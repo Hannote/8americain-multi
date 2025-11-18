@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>8 Américain - Multijoueur</title>
 
 <style>
@@ -28,7 +29,8 @@ body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    height: 100vh;
+    min-height: 100vh;
+    height: auto;
 
     background-image: url("Avenue.jpg");
     background-size: cover;
@@ -308,17 +310,17 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 .board {
     display: flex;
     justify-content: center;
-    align-items: center;
-    gap: 520px;
-    margin: 32px 0;
+    align-items: flex-start;
+    gap: 40px;          /* au lieu de 520px !!! */
+    margin: 20px 0;
     flex-wrap: wrap;
-    max-width: 100%;
+    width: 100%;
 }
 
 /* pioche / défausse */
 .pile {
-    width: calc(var(--card-width) + 130px);
-    height: calc(var(--card-height) + 180px);
+    width: calc(var(--card-width) + 40px);
+    height: calc(var(--card-height) + 60px);
     border-radius: 18px;
     border: 3px dashed rgba(255,255,255,0.7);
     display: flex;
@@ -511,6 +513,25 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 
     #yourHand {
         max-width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+
+    :root {
+        --card-width: 120px;
+        --card-height: 180px;
+        --opponent-card-width: 50px;
+        --opponent-card-height: 75px;
+    }
+
+    .board {
+        gap: 20px;
+    }
+
+    .pile {
+        width: calc(var(--card-width) + 20px);
+        height: calc(var(--card-height) + 40px);
     }
 }
 
