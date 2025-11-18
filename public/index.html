@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>8 Américain - Multijoueur</title>
+
+<style>
+
+/* ========================= */
+/*     VARIABLES CARTES      */
+/* ========================= */
+
+:root {
+    /* CARTES JOUEUR (augmentées) */
+    --card-width: 180px;
+    --card-height: 270px;
+
+    /* Dos adversaires */
+    --opponent-card-width: 80px;
+    --opponent-card-height: 120px;
+}
+
+/* ========================= */
+/*      STYLE GLOBAL         */
+/* ========================= */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+
+    background-image: url("Avenue.jpg");
+    background-size: cover;
+    background-position: center;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 24px;
+}
+
+.overlay {
+    background: rgba(0,0,0,0.82);
+    color: white;
+    border-radius: 20px;
+    text-align: center;
+    box-sizing: border-box;
+    box-shadow: 0 0 40px rgba(0,0,0,0.9);
+}
+
+/* ========================= */
+/*          LOBBY            */
+/* ========================= */
+
+.overlay-lobby {
+    padding: 60px 80px;
+    width: 98%;
+    max-width: 1900px;
+    font-size: 26px;
+}
+
+#lobby input {
+    width: 85%;
+    padding: 24px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: none;
+    font-size: 40px;
+}
+
+#lobby button {
+    margin: 16px 10px;
+    padding: 24px 60px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    font-size: 40px;
+    transition: transform 0.12s;
+}
+
+#lobby button:hover {
+    transform: scale(1.03);
+}
+
+/* ========================= */
+/*        PLATEAU JEU        */
+/* ========================= */
+
+.overlay-game {
+    padding: 40px 60px;
+    width: 95%;
+    max-width: 1700px;
+    font-size: 24px;
+}
+
+h1 { font-size: 40px; margin-bottom: 18px; }
+h2 { font-size: 34px; margin-bottom: 16px; }
+h3 { font-size: 26px; margin: 24px 0 10px; }
+
+.overlay-game button {
+    margin: 12px 8px;
+    padding: 16px 36px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    transition: transform 0.12s;
+}
+
+.overlay-game button:hover {
+    transform: scale(1.03);
+}
+
+#carteZone {
+    margin-top: 12px;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.carte-btn {
+    display: none; /* affichage contrôlé en JS */
+    padding: 20px 40px; /* bouton x2 */
+    font-size: 34px; /* texte x2 */
+    font-weight: 700;
+    border-radius: 24px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.8);
+    letter-spacing: 0.06em;
+}
+
+.carte-btn-principal {
+    background: linear-gradient(135deg, #ffca28, #ff9800);
+    color: #000;
+}
+
+.carte-btn-contre {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    color: #fff;
+}
+
+.carte-btn:hover {
+    transform: scale(1.06);
+    box-shadow: 0 7px 22px rgba(0,0,0,0.9);
+}
+
+#modeOptions {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    color: white;
+    font-size: 22px;
+    text-align: center;
+}
+
+#modeLabel,
+#chillLabel {
+    display: block;
+    margin-bottom: 6px;
+}
+
+#modeSelect {
+    font-size: 26px;
+    padding: 12px 24px;
+    min-width: 280px;
+    border-radius: 8px;
+    border: none;
+}
+
+#chillConfig {
+    margin-top: 12px;
+    display: none;
+}
+
+#chillRounds {
+    font-size: 24px;
+    padding: 8px 14px;
+    width: 120px;
+    border-radius: 8px;
+    border: none;
+    text-align: center;
+}
+
+.top-right-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2000;
+}
+
+#quitGameButton {
+    background: #b71c1c;
+    color: white;
+    padding: 24px 40px;   /* x4 */
+    border-radius: 10px;
+    font-size: 28px;      /* x4 */
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 8px rgba(0,0,0,0.6);
+    display: none;
+}
+
+#quitGameButton:hover {
+    background: #d32f2f;
+}
+
+/* ========================= */
+/*     ZONE PLATEAU          */
+/* ========================= */
+
+#gameArea {
+    display: none;
+}
+
+#tableWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    width: 100%;
+}
+
+/* ========================= */
+/* LISTE DES JOUEURS PLATEAU */
+/* ========================= */
+
+#gamePlayers {
+    width: 100%;
+    margin: 0 auto 10px auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 24px;
+    align-items: stretch;
+}
+
+.player-box {
+    min-width: 260px;
+    max-width: 320px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(0,0,0,0.6);
+    text-align: center;
+    font-size: 18px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.9);
+}
+
+.player-name {
+    margin-bottom: 6px;
+    font-size: 22px;
+}
+
+.player-name.current {
+    font-weight: bold;
+    color: #ffeb3b;
+    text-shadow: 0 0 8px rgba(255,255,0,0.9);
+}
+
+.player-cards {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+/* DOS ADVERSAIRES = même image que la pioche */
+.card-back {
+    width: var(--opponent-card-width);
+    height: var(--opponent-card-height);
+    border-radius: 8px;
+    background-image: url("cartes/dos.png");
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 0 5px rgba(0,0,0,0.95);
+}
+
+/* ========================= */
+/* BANNIÈRE TOUR DE JEU      */
+/* ========================= */
+
+#currentTurnBanner {
+    margin: 8px 0 0 0;
+    min-height: 40px;
+    font-size: 32px;
+    font-weight: bold;
+    color: #ffeb3b;
+    text-shadow: 0 0 10px rgba(255,255,0,0.9);
+    animation: glowPulse 1.6s infinite ease-in-out;
+}
+
+#currentTurnBanner span {
+    font-size: 36px;
+}
+
+@keyframes glowPulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+}
+
+/* ========================= */
+/*   BOARD (pioche/défausse) */
+/* ========================= */
+
+.board {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 520px;
+    margin: 32px 0;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+/* pioche / défausse */
+.pile {
+    width: calc(var(--card-width) + 130px);
+    height: calc(var(--card-height) + 180px);
+    border-radius: 18px;
+    border: 3px dashed rgba(255,255,255,0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 22px;
+    background: rgba(0,0,0,0.6);
+    box-shadow: 0 0 16px rgba(0,0,0,0.95);
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.pile-title {
+    margin-bottom: 6px;
+    font-size: 24px;
+}
+
+.pile-count {
+    font-size: 18px;
+    opacity: 0.95;
+    margin-top: 8px;
+    text-align: center;
+}
+
+.pile-card {
+    margin-top: 10px;
+    flex: 1;
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.9);
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pile-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#defausseCard img {
+    object-fit: contain;
+}
+
+/* ========================= */
+/*       ZONE ANIMATION      */
+/* ========================= */
+
+#effectZone {
+    width: 420px;
+    height: 280px;
+    border-radius: 18px;
+    background: rgba(0,0,0,0.7);
+    box-shadow: 0 0 16px rgba(0,0,0,0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    font-size: 26px;
+}
+
+#effectZone img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* ========================= */
+/*     MAIN DU JOUEUR        */
+/* ========================= */
+
+#yourHand {
+    margin-top: 24px;
+    min-height: calc(var(--card-height) + 30px);
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    width: 100%;
+}
+
+.card {
+    width: var(--card-width);
+    height: var(--card-height);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.95);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.98);
+}
+
+.card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* BOUTON PIOCHER PLUS FUN */
+#drawButton {
+    margin-top: 4px;
+    background: linear-gradient(135deg, #ff9800, #ff5722);
+    color: #fff;
+    font-weight: bold;
+    letter-spacing: 0.03em;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+}
+
+#drawButton:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.9);
+}
+
+/* ========================= */
+/*        MOBILE             */
+/* ========================= */
+
+@media (max-width: 900px) {
+    html, body {
+        font-size: 16px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    #tableWrapper {
+        padding: 12px 8px 120px;
+        max-width: 100%;
+    }
+
+    #boardMain {
+        margin-top: 4vh;
+    }
+
+    /* Zone joueurs au-dessus du plateau */
+    #gamePlayers {
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .player-box {
+        min-width: 130px;
+        padding: 6px 8px;
+    }
+
+    #currentTurnBanner {
+        font-size: 24px;
+        margin-bottom: 12px;
+    }
+
+    /* Pioche / défausse : bien côte à côte sans se chevaucher */
+    #pileZone {
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .deck-box {
+        width: 190px;
+        min-height: 260px;
+    }
+
+    .pile-title {
+        font-size: 18px;
+    }
+
+    .pile-count {
+        font-size: 14px;
+    }
+
+    .pile-card {
+        margin-top: 6px;
+    }
+
+    /* Cartes en main + dos adversaires un peu plus petits */
+    :root {
+        --card-width: 80px;
+        --card-height: 120px;
+        --opponent-card-width: 24px;
+        --opponent-card-height: 34px;
+    }
+
+    #yourHand {
+        max-width: 100%;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ========== LOBBY ========== -->
+
+<div id="lobby" class="overlay overlay-lobby">
+    <h1>8 Américain - Multijoueur</h1>
+    <p>Entre un pseudo et un code de salle</p>
+
+    <input id="pseudo" placeholder="Ton pseudo">
+    <input id="room" placeholder="Code de salle (ex : ABC123)">
+    <br>
+
+    <button onclick="createRoom()">Créer une salle</button>
+    <button onclick="joinRoom()">Rejoindre une salle</button>
+
+    <div id="modeOptions">
+      <label id="modeLabel">Mode de jeu :</label><br>
+      <select id="modeSelect">
+        <option value="battle">Battle Royale</option>
+        <option value="chill">Chill (score)</option>
+      </select>
+
+      <div id="chillConfig">
+        <label id="chillLabel">Nombre de manches :</label><br>
+        <input type="number" id="chillRounds" value="3" min="1" max="50">
+      </div>
+    </div>
+
+    <div id="roomInfo"></div>
+    <div id="status"></div>
+
+    <h3>Joueurs dans la salle :</h3>
+    <div id="players">(personne pour l'instant)</div>
+
+    <button id="startBtn" style="display:none;" onclick="startGame()">
+        Lancer la partie
+    </button>
+</div>
+
+<!-- ========== PLATEAU ========== -->
+
+<div id="gameArea" class="overlay overlay-game" style="display:none;">
+
+    <h2>Partie en cours</h2>
+    <div id="gameRoomName"></div>
+
+    <div id="tableWrapper">
+
+        <h3>Joueurs (dans l'ordre du tour) :</h3>
+        <div id="gamePlayers"></div>
+
+        <div id="currentTurnBanner"></div>
+
+        <div class="board">
+
+            <!-- PIOCHE -->
+            <div class="pile" id="piochePile">
+                <div class="pile-title">Pioche</div>
+                <div class="pile-card" id="piocheCard">
+                    <span style="opacity:0.8;">Cartes restantes</span>
+                </div>
+                <div class="pile-count" id="piocheCount">(?)</div>
+            </div>
+
+            <!-- ZONE ANIMATION -->
+            <div id="effectZone"></div>
+
+            <!-- DEFAUSSE -->
+            <div class="pile" id="defaussePile">
+                <div class="pile-title">Défausse</div>
+                <div class="pile-card" id="defausseCard">
+                    <span style="opacity:0.8;">Aucune carte</span>
+                </div>
+                <div class="pile-count" id="defausseInfo">
+                    Aucune carte
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton Quitter en haut à droite -->
+        <div id="topRightControls" class="top-right-controls">
+            <button id="quitGameButton" onclick="quitCurrentGame()">
+                Quitter la partie
+            </button>
+
+            <div id="chillScoreBoard" style="
+                margin-top: 10px;
+                background: rgba(0,0,0,0.65);
+                padding: 12px 18px;
+                border-radius: 12px;
+                display: none;
+                color: white;
+                font-size: 20px;
+                line-height: 28px;
+                min-width: 150px;
+                text-align: right;
+            "></div>
+        </div>
+
+        <!-- Bouton Piocher sous la table -->
+        <button id="drawButton" onclick="drawCard()">
+            Piocher (passer son tour)
+        </button>
+        <div id="carteZone">
+            <button id="btnCarte" class="carte-btn carte-btn-principal">Carte</button>
+            <button id="btnContre" class="carte-btn carte-btn-contre">Contre carte</button>
+        </div>
+
+        <!-- Titre avec compteur de cartes -->
+        <h3 id="yourHandTitle">Ta main :</h3>
+        <div id="handControls" class="hand-controls">
+            <button id="toggleSortMode">Mode tri : OFF</button>
+            <button id="autoSortColor" style="display:none;">Trier par couleur</button>
+            <button id="autoSortRank" style="display:none;">Trier par valeur</button>
+        </div>
+        <div id="yourHand">(les cartes seront affichées ici)</div>
+
+        <div id="gameStatus"></div>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+
+ </body>
+ </html>
