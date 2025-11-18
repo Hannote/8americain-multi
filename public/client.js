@@ -86,6 +86,7 @@ const yourHandDiv = document.getElementById("yourHand");
 const yourHandTitle = document.getElementById("yourHandTitle");
 const gameStatusDiv = document.getElementById("gameStatus");
 const currentTurnBannerDiv = document.getElementById("currentTurnBanner");
+const currentColorBannerDiv = document.getElementById("currentColorBanner");
 
 const piocheCardDiv = document.getElementById("piocheCard");
 const piocheCountDiv = document.getElementById("piocheCount");
@@ -620,13 +621,13 @@ function renderBoard() {
     img.alt = cardToText(discardTop);
     defausseCardDiv.appendChild(img);
 
+    // Sous la carte : uniquement le nombre de cartes dans la défausse
     defausseInfoDiv.textContent =
-      `${cardToText(discardTop)} – couleur imposée : ${currentColor || discardTop.suit} – ${discardCount} carte(s) dans la défausse`;
+      `${discardCount} carte(s) dans la défausse`;
   } else {
     defausseCardDiv.innerHTML =
       '<span style="opacity:0.8;">Aucune carte</span>';
-    defausseInfoDiv.textContent =
-      "Aucune carte – 0 carte dans la défausse";
+    defausseInfoDiv.textContent = "Aucune carte dans la défausse";
   }
 
   // BANNIÈRE TOUR
@@ -637,6 +638,22 @@ function renderBoard() {
 
   currentTurnBannerDiv.innerHTML =
     `C'est le tour de <span>${pseudoTour}</span>`;
+
+  // BANNIÈRE COULEUR IMPOSÉE (sous le tour)
+  if (currentColorBannerDiv) {
+    if (currentColor) {
+      const colorLabels = {
+        coeur: "cœur",
+        carreau: "carreau",
+        trefle: "trèfle",
+        pique: "pique",
+      };
+      const label = colorLabels[currentColor] || currentColor;
+      currentColorBannerDiv.textContent = `Couleur imposée : ${label}`;
+    } else {
+      currentColorBannerDiv.textContent = "";
+    }
+  }
 }
 
 /* ===========================================================
