@@ -293,6 +293,14 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     animation: glowPulse 1.6s infinite ease-in-out;
 }
 
+#currentColorBanner {
+    margin-top: 4px;
+    min-height: 24px;
+    font-size: 22px;
+    color: #ff9800; /* orange */
+    text-shadow: 0 0 6px rgba(0,0,0,0.9);
+}
+
 #currentTurnBanner span {
     font-size: 36px;
 }
@@ -476,6 +484,11 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
         margin-bottom: 12px;
     }
 
+    #currentColorBanner {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
     /* Pioche / défausse : bien côte à côte sans se chevaucher */
     #pileZone {
         gap: 16px;
@@ -598,6 +611,7 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
         <div id="gamePlayers"></div>
 
         <div id="currentTurnBanner"></div>
+        <div id="currentColorBanner"></div>
 
         <div class="board">
 
@@ -672,4 +686,3 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 
  </body>
  </html>
-
