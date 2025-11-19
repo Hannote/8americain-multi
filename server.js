@@ -1,4 +1,4 @@
-﻿const express = require("express");
+const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const path = require("path");
@@ -901,6 +901,65 @@ io.on("connection", (socket) => {
         return;
       }
     }
+  });
+
+  socket.on("reconnectByPseudo", ({ room, pseudo }) => {
+    if (!room || !pseudo) return;
+    const r = rooms[room];
+    if (!r) return;
+
+    const player = r.players.find(
+      (p) =>
+        p.pseudo === pseudo &&
+        !p.isConnected &&
+        !p.leftCurrentGame
+    );
+    if (!player) return;
+
+    player.socketId = socket.id;
+    player.isConnected = true;
+    socket.join(room);
+    updatePlayerSocketReference(r, player.playerId, socket.id);
+    sendPlayersUpdate(room);
+
+    if (r.game) {
+      const g = r.game;
+      const top = g.discardPile[g.discardPile.length - 1] || null;
+
+      const gameState = {
+        room,
+        players: getPublicPlayers(r),
+        currentTurnIndex: g.currentTurnIndex,
+        drawCount: g.drawPile.length,
+        discardTopCard: top,
+        currentColor: g.currentColor,
+        attackPlus: g.attackPlus,
+        discardCount: g.discardPile.length,
+        skipTurns: g.skipTurns || 0,
+        mode: r.settings ? r.settings.mode : null,
+      };
+
+      const cartePhase = {
+        active: g.cartePhaseActive,
+        targetIndex: g.carteTargetIndex,
+        contreDisponible: g.carteContreDisponible,
+      };
+
+      const playerIndex = g.playerStates.findIndex(
+        (ps) => ps.playerId === player.playerId
+      );
+
+      io.to(socket.id).emit("fullRestore", {
+        hand: player.hand || [],
+        gameState,
+        cartePhase,
+        pendingEight: g.pendingEight,
+        myPlayerIndex: playerIndex,
+        myPseudo: player.pseudo,
+      });
+    }
+
+    socket.emit("reconnectedToRoom", { room });
   });
 
   socket.on("startGame", ({ room }) => {
