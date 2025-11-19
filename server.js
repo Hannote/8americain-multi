@@ -34,6 +34,9 @@ rooms[codeSalle] = {
 
 const rooms = {};
 
+// Nombre de sons disponibles pour le Roi de cœur (côté client: tableau de sons)
+const ROI_COEUR_SOUND_COUNT = 3; // adapte ce nombre si besoin
+
 // Un joueur (playerId) ne doit jamais être dans plusieurs salles en même temps.
 // Cette fonction le retire de toutes les salles sauf éventuellement une salle à garder.
 function removePlayerFromOtherRooms(playerId, roomToKeep = null) {
@@ -1367,13 +1370,20 @@ io.on("connection", (socket) => {
         forcedPlayer.hand.push(drawnCard);
       }
 
+      // Choix d'un son aléatoire pour le Roi de cœur, partagé à toute la room
+      let roiSoundIndex = 0;
+      if (ROI_COEUR_SOUND_COUNT > 0) {
+        roiSoundIndex = Math.floor(Math.random() * ROI_COEUR_SOUND_COUNT);
+      }
+
       io.to(room).emit("effectEvent", {
         type: "roiCoeur",
         message: `Charlie dans la gueule de ${forcedPlayer.pseudo} - Il peut rien faire`,
+        soundIndex: roiSoundIndex,
       });
 
       console.log(
-        `${ps.pseudo} a joué le Roi de cœur. ${forcedPlayer.pseudo} pioche 3 cartes (in-contrable).`
+        `${ps.pseudo} a joué le Roi de cœur. ${forcedPlayer.pseudo} pioche 3 cartes (in-contrable). Son spécial index=${roiSoundIndex}.`
       );
 
       g.extraTurnPending = false;
