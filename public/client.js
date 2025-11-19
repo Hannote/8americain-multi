@@ -1178,7 +1178,15 @@ socket.on(
     );
 
     // Cas spécifique Roi de cœur : son spécial + effet visuel
+    // On NE joue le son QUE si la carte au sommet de la défausse
+    // est bien le Roi de cœur (R_coeur).
     if (type === "roiCoeur") {
+      if (!discardTop || discardTop.rank !== "R" || discardTop.suit !== "coeur") {
+        // Event reçu alors que la défausse ne montre pas le Roi de cœur :
+        // on ignore pour éviter les déclenchements intempestifs
+        return;
+      }
+
       playRoiCoeurSound(soundIndex);
 
       setTimeout(() => {
