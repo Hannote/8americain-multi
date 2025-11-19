@@ -534,9 +534,26 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     padding: 4px 8px;
   }
 
+  /* Main du joueur : grille 4 colonnes sur mobile */
   #yourHand {
     margin-top: 2px;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    justify-items: center;
+    gap: 4px;
+    width: 100%;
+  }
+
+  /* Les cartes s’adaptent à la colonne de la grille */
+  #yourHand .card {
+    width: 100%;
+    height: auto;
+  }
+
+  #yourHand .card-img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
   }
 }
 
