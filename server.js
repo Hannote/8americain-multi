@@ -1315,14 +1315,37 @@ io.on("connection", (socket) => {
         if (!Array.isArray(st.hand) || st.hand.length === 0) return false;
         return true;
       });
-      const duel = activeStates.length === 2 && ps.hand.length > 0;
+      const activePlayersCount = activeStates.length;
+      const isDuel = activePlayersCount === 2;
+      const triedToFinishOnJack = previousHandLength === 1;
 
       io.to(room).emit("effectEvent", {
         type: "valet",
         message: `${ps.pseudo} change le sens`,
       });
 
-      if (duel) {
+      if (isDuel && triedToFinishOnJack) {
+        console.log(
+          `${ps.pseudo} tente de finir sur un Valet en duel dans la salle ${room} : pénalité.`
+        );
+        reshuffleIfNeeded(g);
+        if (g.drawPile.length > 0) {
+          const penalty = g.drawPile.shift();
+          ps.hand.push(penalty);
+        }
+
+        g.extraTurnPending = false;
+
+        if (checkEndOfTurnAndCartePhase(room, g, ps, playerIndex, previousHandLength)) {
+          return;
+        }
+
+        g.currentTurnIndex = nextPlayerIndex(g);
+        broadcastGameState(room);
+        return;
+      }
+
+      if (isDuel && ps.hand.length > 0) {
         console.log(
           `${ps.pseudo} joue un Valet en duel dans la salle ${room} : le tour lui revient.`
         );
