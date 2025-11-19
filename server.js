@@ -1299,6 +1299,12 @@ io.on("connection", (socket) => {
 
     // Valet
     if (card.rank === "V") {
+      const activePlayers = g.playerStates.filter(
+        (st) => Array.isArray(st.hand) && st.hand.length > 0
+      );
+      const isDuel = activePlayers.length === 2;
+      const triedToFinishOnJack = previousHandLength === 1;
+
       ps.hand.splice(cardIdx, 1);
       g.discardPile.push(card);
       g.currentColor = card.suit;
@@ -1306,18 +1312,6 @@ io.on("connection", (socket) => {
       if (ps.hand.length === 0) {
         g.skipTurns = 0;
       }
-
-      const activeStates = g.playerStates.filter((st) => {
-        const rp = r.players.find((p) => p.playerId === st.playerId);
-        if (!rp) return false;
-        if (rp.eliminated) return false;
-        if (st.finishedThisRound) return false;
-        if (!Array.isArray(st.hand) || st.hand.length === 0) return false;
-        return true;
-      });
-      const activePlayersCount = activeStates.length;
-      const isDuel = activePlayersCount === 2;
-      const triedToFinishOnJack = previousHandLength === 1;
 
       io.to(room).emit("effectEvent", {
         type: "valet",
