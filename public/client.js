@@ -102,6 +102,50 @@ const cardImages = {
   "A_pique": "cartes/1s.png",
 };
 
+// ===============================
+//      HELPERS ANIMATIONS CARTES
+// ===============================
+
+function getElementCenter(el) {
+  if (!el) return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+  const r = el.getBoundingClientRect();
+  return {
+    x: r.left + r.width / 2,
+    y: r.top + r.height / 2,
+  };
+}
+
+function animateCardMove(fromEl, toEl, imageSrc) {
+  const layer = document.getElementById("cardAnimationLayer");
+  if (!layer) return;
+
+  const from = getElementCenter(fromEl);
+  const to = getElementCenter(toEl);
+
+  const img = document.createElement("img");
+  img.src = imageSrc;
+  img.className = "flying-card";
+
+  const startX = from.x - 60;
+  const startY = from.y - 90;
+  const endX = to.x - 60;
+  const endY = to.y - 90;
+
+  img.style.transform = `translate(${startX}px, ${startY}px)`;
+  img.style.opacity = "1";
+
+  layer.appendChild(img);
+
+  requestAnimationFrame(() => {
+    img.style.transform = `translate(${endX}px, ${endY}px)`;
+    img.style.opacity = "0";
+  });
+
+  img.addEventListener("transitionend", () => {
+    img.remove();
+  });
+}
+
 function getCardImage(card) {
   if (!card) return PIOCHE_IMAGE;
   const key = `${card.rank}_${card.suit}`;
@@ -213,6 +257,12 @@ let currentMode = null;
 let sortMode = false;
 let sortSelectedIndex = null;
 let lastAttackPlusDisplayed = 0;
+// État pour synchroniser sons + animations à partir de gameState
+let lastDiscardCardKey = null;
+let lastDrawPileCountValue = null;
+let lastPlayersSnapshot = null;
+let lastTurnIndex = null;
+let gameStateInitialized = false;
 
 function getHandOrderKey() {
   const room = currentRoom || window.roomCode || "";
@@ -432,6 +482,12 @@ function renderGamePlayers() {
     box.appendChild(cardsDiv);
     gamePlayersDiv.appendChild(box);
   });
+}
+
+function findPlayerBoxByIndex(index) {
+  if (!gamePlayersDiv) return null;
+  const boxes = gamePlayersDiv.querySelectorAll(".player-box");
+  return boxes[index] || null;
 }
 
 function renderChillScores(players, mode) {
@@ -899,32 +955,72 @@ socket.on("gameState", (data) => {
     mode,
   } = data;
 
+  const prevPlayers = Array.isArray(lastPlayersSnapshot)
+    ? lastPlayersSnapshot
+    : null;
+  const prevTurnIndex = lastTurnIndex;
+
+  const newPlayers = Array.isArray(players) ? players : [];
+  const newDrawCount =
+    typeof drawCount === "number" ? drawCount : 0;
+
   const newDiscardKey = discardTopCard
-    ? discardTopCard.id || `${discardTopCard.rank}_${discardTopCard.suit}`
+    ? (discardTopCard.id || `${discardTopCard.rank}_${discardTopCard.suit}`)
     : null;
 
-  const newDrawCount = typeof drawCount === "number" ? drawCount : 0;
+  let playedCard = false;
+  let drewCard = false;
+  let playPlayerIndex = null;
+  let drawPlayerIndex = null;
 
   if (gameStateInitialized) {
     if (newDiscardKey && newDiscardKey !== lastDiscardCardKey) {
-      playCardSound();
+      playedCard = true;
+      if (typeof prevTurnIndex === "number") {
+        playPlayerIndex = prevTurnIndex;
+      }
     }
 
     if (
       lastDrawPileCountValue != null &&
       newDrawCount < lastDrawPileCountValue
     ) {
-      playDrawSound();
+      drewCard = true;
+
+      if (prevPlayers && prevPlayers.length === newPlayers.length) {
+        for (let i = 0; i < newPlayers.length; i++) {
+          const before = prevPlayers[i];
+          const after = newPlayers[i];
+          const beforeCount =
+            before && typeof before.cardCount === "number"
+              ? before.cardCount
+              : 0;
+          const afterCount =
+            after && typeof after.cardCount === "number"
+              ? after.cardCount
+              : 0;
+          if (afterCount > beforeCount) {
+            drawPlayerIndex = i;
+            break;
+          }
+        }
+      }
     }
   }
 
   lastDiscardCardKey = newDiscardKey;
   lastDrawPileCountValue = newDrawCount;
-  gameStateInitialized = true;
+  lastPlayersSnapshot = newPlayers.map((p) => ({
+    cardCount: typeof p.cardCount === "number" ? p.cardCount : 0,
+  }));
+  lastTurnIndex =
+    typeof currentTurnIndex === "number" ? currentTurnIndex : null;
+
+  const localMyIndexBefore = myIndexInGame;
 
   currentRoom = room;
   window.roomCode = room;
-  currentPlayersPub = players || [];
+  currentPlayersPub = newPlayers;
   currentMode = mode || null;
   currentTurnIdx =
     typeof currentTurnIndex === "number" ? currentTurnIndex : 0;
@@ -942,6 +1038,7 @@ socket.on("gameState", (data) => {
     (p) => p.pseudo === myPseudo
   );
   window.myPlayerIndex = myIndexInGame;
+
   const isMyTurn =
     myIndexInGame !== -1 && myIndexInGame === currentTurnIdx;
   const skip = skipTurns || 0;
@@ -970,6 +1067,55 @@ socket.on("gameState", (data) => {
   renderBoard();
   renderMyHand();
 
+  if (gameStateInitialized) {
+    if (playedCard && discardTopCard) {
+      playCardSound();
+
+      const toEl = defausseCardDiv;
+      let fromEl = null;
+
+      const effectivePlayIndex = playPlayerIndex;
+
+      if (
+        typeof effectivePlayIndex === "number" &&
+        effectivePlayIndex >= 0
+      ) {
+        if (
+          localMyIndexBefore !== -1 &&
+          effectivePlayIndex === localMyIndexBefore
+        ) {
+          fromEl = yourHandDiv;
+        } else {
+          fromEl = findPlayerBoxByIndex(effectivePlayIndex);
+        }
+      }
+
+      const imgSrc = getCardImage(discardTopCard);
+      animateCardMove(fromEl || toEl, toEl, imgSrc);
+    }
+
+    if (drewCard && drawPlayerIndex != null) {
+      playDrawSound();
+
+      const fromEl = piocheCardDiv;
+      let toEl = null;
+
+      if (
+        localMyIndexBefore !== -1 &&
+        drawPlayerIndex === localMyIndexBefore
+      ) {
+        toEl = yourHandDiv;
+      } else {
+        toEl = findPlayerBoxByIndex(drawPlayerIndex) || fromEl;
+      }
+
+      animateCardMove(fromEl, toEl, PIOCHE_IMAGE);
+    }
+  }
+
+  if (!gameStateInitialized) {
+    gameStateInitialized = true;
+  }
 });
 
 socket.on("handUpdate", ({ hand }) => {
@@ -1379,7 +1525,3 @@ sortStyle.textContent = `
 }
 `;
 document.head.appendChild(sortStyle);
-
-let lastDiscardCardKey = null;
-let lastDrawPileCountValue = null;
-let gameStateInitialized = false;
