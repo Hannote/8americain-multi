@@ -458,7 +458,7 @@ function renderChillScores(players, mode) {
 
 function playCard(cardId) {
   if (!currentRoom || !cardId) return;
-  playCardSound();
+  // On n'appelle plus playCardSound() directement ici
   socket.emit("playCard", { room: currentRoom, cardId });
 }
 
@@ -715,7 +715,7 @@ function renderBoard() {
 function drawCard() {
   if (!currentRoom) return;
   if (cartePhaseActive) return;
-  playDrawSound();
+  // On n'appelle plus playDrawSound() directement ici
   socket.emit("drawCard", { room: currentRoom });
 }
 
@@ -899,14 +899,36 @@ socket.on("gameState", (data) => {
     mode,
   } = data;
 
+  const newDiscardKey = discardTopCard
+    ? discardTopCard.id || `${discardTopCard.rank}_${discardTopCard.suit}`
+    : null;
+
+  const newDrawCount = typeof drawCount === "number" ? drawCount : 0;
+
+  if (gameStateInitialized) {
+    if (newDiscardKey && newDiscardKey !== lastDiscardCardKey) {
+      playCardSound();
+    }
+
+    if (
+      lastDrawPileCountValue != null &&
+      newDrawCount < lastDrawPileCountValue
+    ) {
+      playDrawSound();
+    }
+  }
+
+  lastDiscardCardKey = newDiscardKey;
+  lastDrawPileCountValue = newDrawCount;
+  gameStateInitialized = true;
+
   currentRoom = room;
   window.roomCode = room;
   currentPlayersPub = players || [];
   currentMode = mode || null;
   currentTurnIdx =
     typeof currentTurnIndex === "number" ? currentTurnIndex : 0;
-  drawPileCount =
-    typeof drawCount === "number" ? drawCount : 0;
+  drawPileCount = newDrawCount;
 
   discardTop = discardTopCard || null;
   currentColor = col || (discardTop ? discardTop.suit : null);
@@ -998,6 +1020,9 @@ socket.on(
 );
 
 socket.on("fullRestore", (data) => {
+  gameStateInitialized = false;
+  lastDiscardCardKey = null;
+  lastDrawPileCountValue = null;
   const restoredHand = data.hand || [];
   myHand = applySavedHandOrder(restoredHand);
   const g = data.gameState || {};
@@ -1354,3 +1379,7 @@ sortStyle.textContent = `
 }
 `;
 document.head.appendChild(sortStyle);
+
+let lastDiscardCardKey = null;
+let lastDrawPileCountValue = null;
+let gameStateInitialized = false;
