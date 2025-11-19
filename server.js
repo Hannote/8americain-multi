@@ -34,6 +34,30 @@ rooms[codeSalle] = {
 
 const rooms = {};
 
+// Un joueur (playerId) ne doit jamais être dans plusieurs salles en même temps.
+// Cette fonction le retire de toutes les salles sauf éventuellement une salle à garder.
+function removePlayerFromOtherRooms(playerId, roomToKeep = null) {
+  if (!playerId) return;
+  for (const [code, r] of Object.entries(rooms)) {
+    if (roomToKeep && code === roomToKeep) continue;
+    if (!r || !Array.isArray(r.players)) continue;
+
+    const idx = r.players.findIndex((p) => p.playerId === playerId);
+    if (idx !== -1) {
+      const removed = r.players.splice(idx, 1)[0];
+      console.log(
+        `Player ${removed.pseudo || removed.playerId} retiré de la salle ${code} car il rejoint/crée une autre salle.`
+      );
+      sendPlayersUpdate(code);
+
+      if (r.players.length === 0 && !r.game) {
+        console.log(`Salle ${code} vide sans partie active, suppression.`);
+        delete rooms[code];
+      }
+    }
+  }
+}
+
 // =============== UTILITAIRES CARTES ===============
 
 function createDeck() {
@@ -582,16 +606,19 @@ io.on("connection", (socket) => {
       }
       if (!playerId) {
         return callback({ ok: false, error: "playerId manquant." });
-      }
-      if (rooms[room]) {
-        return callback({ ok: false, error: "Cette salle existe déjà." });
-      }
+    }
+    if (rooms[room]) {
+      return callback({ ok: false, error: "Cette salle existe déjà." });
+    }
 
-      rooms[room] = {
-        hostId: playerId,
-        players: [],
-        game: null,
-        settings: {
+    // S'assurer que ce playerId ne reste pas dans une autre salle
+    removePlayerFromOtherRooms(playerId);
+
+    rooms[room] = {
+      hostId: playerId,
+      players: [],
+      game: null,
+      settings: {
           mode: null,
           totalRounds: 0,
           currentRound: 1,
@@ -625,15 +652,18 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", ({ pseudo, room, playerId }, callback) => {
     try {
       const r = rooms[room];
-      if (!r) {
-        return callback({ ok: false, error: "Salle introuvable." });
-      }
-      if (!playerId) {
-        return callback({ ok: false, error: "playerId manquant." });
-      }
+    if (!r) {
+      return callback({ ok: false, error: "Salle introuvable." });
+    }
+    if (!playerId) {
+      return callback({ ok: false, error: "playerId manquant." });
+    }
 
-      let player = r.players.find((p) => p.playerId === playerId);
-      if (player) {
+    // S'assurer que ce playerId ne reste pas inscrit dans une autre salle
+    removePlayerFromOtherRooms(playerId, room);
+
+    let player = r.players.find((p) => p.playerId === playerId);
+    if (player) {
         player.socketId = socket.id;
         player.isConnected = true;
         player.leftCurrentGame = false;
