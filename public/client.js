@@ -621,13 +621,13 @@ function renderBoard() {
     img.alt = cardToText(discardTop);
     defausseCardDiv.appendChild(img);
 
-    // Sous la carte : uniquement le nombre de cartes dans la défausse
-    defausseInfoDiv.textContent =
-      `${discardCount} carte(s) dans la défausse`;
+    // Texte simplifi� : uniquement le nombre de cartes
+    defausseInfoDiv.textContent = `${discardCount} carte(s)`;
   } else {
     defausseCardDiv.innerHTML =
       '<span style="opacity:0.8;">Aucune carte</span>';
-    defausseInfoDiv.textContent = "Aucune carte dans la défausse";
+    // Coh�rent avec la pioche : 0 carte(s)
+    defausseInfoDiv.textContent = "0 carte(s)";
   }
 
   // BANNIÈRE TOUR
@@ -636,23 +636,20 @@ function renderBoard() {
     pseudoTour = currentPlayersPub[currentTurnIdx].pseudo;
   }
 
-  currentTurnBannerDiv.innerHTML =
-    `C'est le tour de <span>${pseudoTour}</span>`;
+  const imposedColor = currentColor || (discardTop ? discardTop.suit : null);
 
-  // BANNIÈRE COULEUR IMPOSÉE (sous le tour)
+  if (imposedColor) {
+    currentTurnBannerDiv.innerHTML =
+      `C'est le tour de <span>${pseudoTour}</span>` +
+      `<div class="current-color-line">Couleur impos�e : ${imposedColor}</div>`;
+  } else {
+    currentTurnBannerDiv.innerHTML =
+      `C'est le tour de <span>${pseudoTour}</span>`;
+  }
+
+  // Ancienne banni�re couleur d�sormais vide : la couleur est affich�e sous le tour
   if (currentColorBannerDiv) {
-    if (currentColor) {
-      const colorLabels = {
-        coeur: "cœur",
-        carreau: "carreau",
-        trefle: "trèfle",
-        pique: "pique",
-      };
-      const label = colorLabels[currentColor] || currentColor;
-      currentColorBannerDiv.textContent = `Couleur imposée : ${label}`;
-    } else {
-      currentColorBannerDiv.textContent = "";
-    }
+    currentColorBannerDiv.textContent = "";
   }
 }
 
