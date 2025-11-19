@@ -13,6 +13,57 @@ const socket = io();
 
 const PIOCHE_IMAGE = "cartes/dos.png";
 
+// ===============================
+//           SONS CARTES
+// ===============================
+
+// Préférence simple (pour plus tard, si on ajoute un bouton mute)
+let soundEnabled = true;
+let audioUnlocked = false;
+
+// Fichiers sons (présents dans public/sons/)
+const sndPlay = new Audio("sons/card-play.mp3");
+const sndDraw = new Audio("sons/card-draw.mp3");
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+
+  [sndPlay, sndDraw].forEach((a) => {
+    try {
+      a.muted = true;
+      const p = a.play();
+      if (p && typeof p.then === "function") {
+        p.then(() => {
+          a.pause();
+          a.currentTime = 0;
+          a.muted = false;
+        }).catch(() => {});
+      } else {
+        a.pause();
+        a.currentTime = 0;
+        a.muted = false;
+      }
+    } catch (e) {}
+  });
+}
+
+function playCardSound() {
+  if (!soundEnabled) return;
+  try {
+    sndPlay.currentTime = 0;
+    sndPlay.play().catch(() => {});
+  } catch (e) {}
+}
+
+function playDrawSound() {
+  if (!soundEnabled) return;
+  try {
+    sndDraw.currentTime = 0;
+    sndDraw.play().catch(() => {});
+  } catch (e) {}
+}
+
 const cardImages = {
   "7_coeur": "cartes/7h.png",
   "8_coeur": "cartes/8h.png",
@@ -222,6 +273,7 @@ function setGameStatus(msg) {
 =========================================================== */
 
 function createRoom() {
+  unlockAudio();
   const pseudo = pseudoInput.value.trim();
   const room = roomInput.value.trim();
 
@@ -247,6 +299,7 @@ function createRoom() {
 }
 
 function joinRoom() {
+  unlockAudio();
   const pseudo = pseudoInput.value.trim();
   const room = roomInput.value.trim();
 
@@ -293,6 +346,7 @@ socket.on("updatePlayers", (playerList) => {
 =========================================================== */
 
 function startGame() {
+  unlockAudio();
   if (!currentRoom || !isHost) return;
   const mode = modeSelect ? modeSelect.value : "battle";
   const roundsInput = document.getElementById("chillRounds");
@@ -404,6 +458,7 @@ function renderChillScores(players, mode) {
 
 function playCard(cardId) {
   if (!currentRoom || !cardId) return;
+  playCardSound();
   socket.emit("playCard", { room: currentRoom, cardId });
 }
 
@@ -660,6 +715,7 @@ function renderBoard() {
 function drawCard() {
   if (!currentRoom) return;
   if (cartePhaseActive) return;
+  playDrawSound();
   socket.emit("drawCard", { room: currentRoom });
 }
 
