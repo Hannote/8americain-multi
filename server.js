@@ -1162,6 +1162,8 @@ io.on("connection", (socket) => {
         `${ps.pseudo} joue 10 de ${card.suit} et rejoue immédiatement dans la salle ${room}`
       );
 
+      const triedToFinishOnTen = previousHandLength === 1;
+
       // Impossible de finir sur un 10
       if (ps.hand.length === 0) {
         reshuffleIfNeeded(g);
@@ -1176,6 +1178,18 @@ io.on("connection", (socket) => {
             `${ps.pseudo} ne peut pas finir sur un 10 mais la pioche est vide dans la salle ${room}.`
           );
         }
+      }
+
+      if (triedToFinishOnTen) {
+        g.extraTurnPending = false;
+
+        if (checkEndOfTurnAndCartePhase(room, g, ps, playerIndex, previousHandLength)) {
+          return;
+        }
+
+        g.currentTurnIndex = nextPlayerIndex(g);
+        broadcastGameState(room);
+        return;
       }
 
       const hasPlayable = ps.hand.some((c) => isCardPlayable(g, c));
