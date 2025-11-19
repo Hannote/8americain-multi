@@ -340,6 +340,10 @@ function createRoom() {
 
     myPseudo = pseudo;
     currentRoom = room;
+    try {
+      localStorage.setItem("lastRoomCode", room);
+      localStorage.setItem("lastPseudo", pseudo);
+    } catch (e) {}
     isHost = true;
 
     roomInfoDiv.textContent = "Salle : " + room + " (tu es l'hôte)";
@@ -366,6 +370,10 @@ function joinRoom() {
 
     myPseudo = pseudo;
     currentRoom = room;
+    try {
+      localStorage.setItem("lastRoomCode", room);
+      localStorage.setItem("lastPseudo", pseudo);
+    } catch (e) {}
     isHost = false;
 
     roomInfoDiv.textContent = "Salle : " + room;
@@ -1368,8 +1376,21 @@ socket.on("gameEnded", ({ winner }) => {
 });
 
 socket.on("connect", () => {
-  console.log("Connecté au serveur.");
+  console.log("Connecté au serveur avec playerId:", playerId);
   socket.emit("reconnectWithId", { playerId });
+  try {
+    const lastRoomCode = localStorage.getItem("lastRoomCode");
+    const lastPseudo = localStorage.getItem("lastPseudo");
+
+    if (lastRoomCode && lastPseudo) {
+      socket.emit("reconnectByPseudo", {
+        room: lastRoomCode,
+        pseudo: lastPseudo,
+      });
+    }
+  } catch (e) {
+    console.warn("Impossible de lire lastRoomCode/lastPseudo", e);
+  }
 });
 
 socket.on("disconnect", () => {
