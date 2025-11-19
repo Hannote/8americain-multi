@@ -641,7 +641,7 @@ function renderBoard() {
   if (imposedColor) {
     currentTurnBannerDiv.innerHTML =
       `C'est le tour de <span>${pseudoTour}</span>` +
-      `<div class="current-color-line">Couleur impos�e : ${imposedColor}</div>`;
+      `<div class="current-color-line">Couleur impos\u00e9e : ${imposedColor}</div>`;
   } else {
     currentTurnBannerDiv.innerHTML =
       `C'est le tour de <span>${pseudoTour}</span>`;
