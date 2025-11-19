@@ -384,9 +384,14 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 /*       ZONE ANIMATION      */
 /* ========================= */
 
+/*       ZONE ANIMATION      */
+/* ========================= */
+
 #effectZone {
     width: 420px;
-    height: 280px;
+    max-width: 95vw;
+    min-height: 120px;
+    max-height: 60vh;
     border-radius: 18px;
     background: rgba(0,0,0,0.7);
     box-shadow: 0 0 16px rgba(0,0,0,0.95);
@@ -395,8 +400,17 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 20px;
+    padding: 16px;
     font-size: 26px;
+    box-sizing: border-box;
+}
+
+/* Texte de l’animation : retour à la ligne */
+.effectMessage {
+    width: 100%;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 #effectZone img {
@@ -675,6 +689,12 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     height: auto;
     object-fit: contain;
     border-radius: 10px;
+  }
+
+  #effectZone {
+    font-size: 18px;
+    padding: 12px;
+    max-width: 92vw;
   }
 }
 
