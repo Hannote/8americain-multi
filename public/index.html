@@ -541,36 +541,48 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 }
 
 @media (max-width: 600px) {
+  /* Cartes un peu plus petites sur mobile pour gagner de la place */
   :root {
-    --card-width: 72px;
-    --card-height: 108px;
-    --opponent-card-width: 22px;
-    --opponent-card-height: 32px;
+    --card-width: 90px;
+    --card-height: 135px;
+    --opponent-card-width: 32px;
+    --opponent-card-height: 48px;
   }
 
-  #tableWrapper {
-    gap: 10px;
-  }
-
+  /* Pioche + Défausse : côte à côte, sans chevauchement */
   .board {
-    gap: 10px;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    gap: 12px;
   }
 
-  /* Piles auto-hauteur pour que la carte ne soit plus rognée */
+  /* Chaque pile s’adapte au contenu, plus de hauteur fixe */
   .pile {
-    width: auto;
-    min-width: calc(var(--card-width) + 28px);
+    width: calc(var(--card-width) + 24px);
     height: auto;
-    padding: 8px 10px;
+    padding: 10px 12px;
   }
 
   .pile-title {
     font-size: 18px;
+    margin-bottom: 4px;
   }
 
+  .pile-count {
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* Zone carte = hauteur fixe basée sur la carte */
   .pile-card {
-    flex: 0 0 auto;
+    margin-top: 6px;
+    width: 100%;
     height: var(--card-height);
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .pile-card img {
@@ -579,42 +591,26 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     object-fit: contain;
   }
 
-  .pile-count {
-    font-size: 14px;
-    margin-top: 4px;
-  }
-
-  #drawButton {
-    margin-top: 6px;
-    margin-bottom: 2px;
-    padding: 8px 14px;
-    font-size: 16px;
-  }
-
+  /* Main du joueur : un peu plus compact */
   #yourHandTitle {
-    font-size: 16px;
-    margin-top: 2px;
+    font-size: 18px;
+    margin-top: 6px;
     margin-bottom: 2px;
   }
 
   #handControls {
     margin-top: 0;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
   }
 
   #toggleSortMode {
-    font-size: 13px;
-    padding: 3px 8px;
-  }
-
-  .hand-controls button {
-    font-size: 13px;
-    padding: 3px 6px;
+    font-size: 14px;
+    padding: 4px 10px;
   }
 
   #yourHand {
-    margin-top: 0;
-    gap: 4px;
+    margin-top: 2px;
+    gap: 6px;
   }
 }
 
