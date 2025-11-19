@@ -1417,18 +1417,15 @@ io.on("connection", (socket) => {
         `${ps.pseudo} a joué le Roi de cœur. ${forcedPlayer.pseudo} pioche 3 cartes (in-contrable). Son spécial index=${roiSoundIndex}.`
       );
 
+      g.skipTurns = 1;
       g.extraTurnPending = false;
 
       if (checkEndOfTurnAndCartePhase(room, g, ps, playerIndex, previousHandLength)) {
         return;
       }
 
-      g.currentTurnIndex = next;
-      const afterForced = nextPlayerIndex(g);
-      g.currentTurnIndex = afterForced;
-      setTimeout(() => {
-        broadcastGameState(room);
-      }, 50);
+      g.currentTurnIndex = nextPlayerIndex(g);
+      broadcastGameState(room);
       return;
     }
 
