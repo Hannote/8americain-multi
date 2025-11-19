@@ -17,15 +17,15 @@ const PIOCHE_IMAGE = "cartes/dos.png";
 //           SONS CARTES
 // ===============================
 
-// PrÃ©fÃ©rence simple (pour plus tard, si on ajoute un bouton mute)
+// Préférence simple (pour plus tard, si on ajoute un bouton mute)
 let soundEnabled = true;
 let audioUnlocked = false;
 
-// Fichiers sons (prÃ©sents dans public/sons/)
+// Fichiers sons (présents dans public/sons/)
 const sndPlay = new Audio("sons/card-play.mp3");
 const sndDraw = new Audio("sons/card-draw.mp3");
 
-// Sons spÃ©ciaux pour le Roi de cÅ“ur
+// Sons spéciaux pour le Roi de cœur
 const roiCoeurSoundFiles = [
   "sons/roi-coeur-1.mp3",
   "sons/roi-coeur-2.mp3",
@@ -40,7 +40,7 @@ function playRoiCoeurSound(index) {
 
   let i;
   if (typeof index === "number" && roiCoeurAudios.length > 0) {
-    // normalise lâ€™index envoyÃ© par le serveur
+    // normalise l'index envoyé par le serveur
     i =
       ((index % roiCoeurAudios.length) + roiCoeurAudios.length) %
       roiCoeurAudios.length;
@@ -186,7 +186,7 @@ function getCardImage(card) {
 
 function cardToText(card) {
   if (!card) return "";
-  const suitSymbols = { coeur: "â™¥", carreau: "â™¦", trefle: "â™£", pique: "â™ " };
+  const suitSymbols = { coeur: "♥", carreau: "♦", trefle: "♣", pique: "♠" };
   return `${card.rank}${suitSymbols[card.suit] || "?"}`;
 }
 
@@ -289,7 +289,7 @@ let currentMode = null;
 let sortMode = false;
 let sortSelectedIndex = null;
 let lastAttackPlusDisplayed = 0;
-// Ã‰tat pour synchroniser sons + animations Ã  partir de gameState
+// État pour synchroniser sons + animations à partir de gameState
 let lastDiscardCardKey = null;
 let lastDrawPileCountValue = null;
 let lastPlayersSnapshot = null;
@@ -351,7 +351,7 @@ function setGameStatus(msg) {
 }
 
 /* ===========================================================
-    LOBBY â€” CREATION / JOIN
+    LOBBY — CREATION / JOIN
 =========================================================== */
 
 function createRoom() {
@@ -378,9 +378,9 @@ function createRoom() {
     } catch (e) {}
     isHost = true;
 
-    roomInfoDiv.textContent = "Salle : " + room + " (tu es l'hÃ´te)";
+    roomInfoDiv.textContent = "Salle : " + room + " (tu es l'hôte)";
     startBtn.style.display = "inline-block";
-    setStatus("Salle crÃ©Ã©e. En attente d'autres joueurs...");
+    setStatus("Salle créée. En attente d'autres joueurs...");
   });
 }
 
@@ -421,12 +421,12 @@ socket.on("updatePlayers", (playerList) => {
   playersDiv.innerHTML = playerList
     .map((p) => {
       const pseudo = p.pseudo || "?";
-      const status = p.isConnected ? "" : " (dÃ©connectÃ©)";
+      const status = p.isConnected ? "" : " (déconnecté)";
       const count =
         typeof p.cardCount === "number"
           ? ` - ${p.cardCount} carte${p.cardCount > 1 ? "s" : ""}`
           : "";
-      return `â€¢ ${pseudo}${status}${count}`;
+      return `• ${pseudo}${status}${count}`;
     })
     .join("<br>");
 });
@@ -456,7 +456,7 @@ socket.on("gameStarted", ({ room }) => {
   gameAreaDiv.style.display = "block";
   if (quitBtn) quitBtn.style.display = "block";
   gameRoomName.textContent = "Salle : " + room;
-  setGameStatus("La partie a dÃ©marrÃ©.");
+  setGameStatus("La partie a démarré.");
 });
 
 /* ===========================================================
@@ -484,7 +484,7 @@ function renderGamePlayers() {
 
     let label = p.pseudo;
     if (p.pseudo === myPseudo) label += " (toi)";
-    if (!p.isConnected) label += " (dÃ©connectÃ©)";
+    if (!p.isConnected) label += " (déconnecté)";
     nameDiv.textContent = `${label} - ${p.cardCount} carte(s)`;
     headerDiv.appendChild(nameDiv);
 
@@ -543,7 +543,7 @@ function renderChillScores(players, mode) {
     .map((p) => {
       const pseudo = p.pseudo || "?";
       const score = typeof p.score === "number" && p.score > 0 ? p.score : 0;
-      return `${pseudo} ${"â˜…".repeat(score)}`;
+      return `${pseudo} ${"★".repeat(score)}`;
     })
     .join("<br>");
 }
@@ -772,16 +772,16 @@ function renderBoard() {
     img.alt = cardToText(discardTop);
     defausseCardDiv.appendChild(img);
 
-    // Texte simplifiï¿½ : uniquement le nombre de cartes
+    // Texte simplifié : uniquement le nombre de cartes
     defausseInfoDiv.textContent = `${discardCount} carte(s)`;
   } else {
     defausseCardDiv.innerHTML =
       '<span style="opacity:0.8;">Aucune carte</span>';
-    // Cohï¿½rent avec la pioche : 0 carte(s)
+    // Cohérent avec la pioche : 0 carte(s)
     defausseInfoDiv.textContent = "0 carte(s)";
   }
 
-  // BANNIÃˆRE TOUR
+  // BANNIÈRE TOUR
   let pseudoTour = "?";
   if (currentPlayersPub && currentPlayersPub[currentTurnIdx]) {
     pseudoTour = currentPlayersPub[currentTurnIdx].pseudo;
@@ -798,7 +798,7 @@ function renderBoard() {
       `C'est le tour de <span>${pseudoTour}</span>`;
   }
 
-  // Ancienne banniï¿½re couleur dï¿½sormais vide : la couleur est affichï¿½e sous le tour
+  // Ancienne bannière couleur désormais vide : la couleur est affichée sous le tour
   if (currentColorBannerDiv) {
     currentColorBannerDiv.textContent = "";
   }
@@ -871,7 +871,7 @@ function quitCurrentGame() {
   }
 
   const sure = confirm(
-    "âš ï¸ Voulez-vous vraiment quitter la partie ?\nCette action est irrÃ©versible."
+    "⚠️ Voulez-vous vraiment quitter la partie ?\nCette action est irréversible."
   );
   if (!sure) {
     return;
@@ -886,8 +886,8 @@ function quitCurrentGame() {
 
   resetToLobby(
     wasHost
-      ? "Tu as quittÃ© la partie en tant qu'hÃ´te. La salle est fermÃ©e."
-      : "Tu as quittÃ© la partie en cours. Tu restes dans le lobby."
+      ? "Tu as quitté la partie en tant qu'hôte. La salle est fermée."
+      : "Tu as quitté la partie en cours. Tu restes dans le lobby."
   );
 }
 
@@ -927,7 +927,7 @@ function showEffect(message, imageUrl = null) {
   // affiche
   effectZone.classList.add("visible");
 
-  // disparaÃ®t aprÃ¨s 2s
+  // disparaît après 2s
   setTimeout(() => {
     effectZone.classList.remove("visible");
   }, 2000);
@@ -948,10 +948,10 @@ function askColorChoice(cardId) {
   popup.innerHTML = `
     <div class="color-choice-box">
       <h3>Choisis une couleur :</h3>
-      <button class="color-btn" data-color="coeur">â™¥</button>
-      <button class="color-btn" data-color="carreau">â™¦</button>
-      <button class="color-btn" data-color="trefle">â™£</button>
-      <button class="color-btn" data-color="pique">â™ </button>
+      <button class="color-btn" data-color="coeur">♥</button>
+      <button class="color-btn" data-color="carreau">♦</button>
+      <button class="color-btn" data-color="trefle">♣</button>
+      <button class="color-btn" data-color="pique">♠</button>
     </div>
   `;
 
@@ -1290,11 +1290,11 @@ socket.on("cartePhaseStart", ({ targetIndex, targetPseudo }) => {
 
   if (targetPseudo) {
     setGameStatus(
-      `${targetPseudo} est Ã  1 carte ! Il doit appuyer sur "Carte". Les adversaires pourront appuyer sur "Contre carte" dans 1 seconde.`
+      `${targetPseudo} est à 1 carte ! Il doit appuyer sur "Carte". Les adversaires pourront appuyer sur "Contre carte" dans 1 seconde.`
     );
   } else {
     setGameStatus(
-      `Un joueur est Ã  1 carte ! Il doit appuyer sur "Carte". Les adversaires pourront appuyer sur "Contre carte" dans 1 seconde.`
+      `Un joueur est à 1 carte ! Il doit appuyer sur "Carte". Les adversaires pourront appuyer sur "Contre carte" dans 1 seconde.`
     );
   }
 
@@ -1321,21 +1321,21 @@ socket.on("cartePhaseEnd", () => {
 });
 
 socket.on("roomClosed", ({ reason }) => {
-  let msg = "La salle a Ã©tÃ© fermÃ©e.";
+  let msg = "La salle a été fermée.";
   if (reason === "host_quit") {
-    msg = "L'hÃ´te a quittÃ© la partie. La salle a Ã©tÃ© fermÃ©e.";
+    msg = "L'hôte a quitté la partie. La salle a été fermée.";
   }
   resetToLobby(msg);
 });
 
 socket.on("playerQuitGameInfo", ({ pseudo }) => {
   if (pseudo) {
-    setGameStatus(`${pseudo} a quittÃ© la partie en cours.`);
+    setGameStatus(`${pseudo} a quitté la partie en cours.`);
   }
 });
 
 socket.on("kickedFromGame", ({ room, reason }) => {
-  resetToLobby("Tu as Ã©tÃ© expulsÃ© de la partie par l'hÃ´te.");
+  resetToLobby("Tu as été expulsé de la partie par l'hôte.");
 });
 
 socket.on("newRound", ({ round, total, mode, players }) => {
@@ -1354,7 +1354,7 @@ socket.on("newRound", ({ round, total, mode, players }) => {
 });
 
 socket.on("chillGameOver", ({ scores, winnerId, winnerPseudo }) => {
-  // DÃ©terminer le pseudo du gagnant
+  // Déterminer le pseudo du gagnant
   let gagnant = winnerPseudo || null;
 
   if (!gagnant && winnerId && Array.isArray(currentPlayersPub)) {
@@ -1371,7 +1371,7 @@ socket.on("chillGameOver", ({ scores, winnerId, winnerPseudo }) => {
   // Message identique pour tout le monde
   alert(`${gagnant} remporte la victoire !`);
 
-  // On met quand mÃªme Ã  jour l'affichage des scores finaux
+  // On met quand même à jour l'affichage des scores finaux
   const finalPlayers = Object.entries(scores || {}).map(([id, score]) => {
     const pp = currentPlayersPub.find((p) => p.playerId === id);
     return {
@@ -1384,21 +1384,21 @@ socket.on("chillGameOver", ({ scores, winnerId, winnerPseudo }) => {
 
 socket.on("battleGameOver", ({ winner }) => {
   if (winner) {
-    alert(`Battle Royale terminÃ© ! ${winner} a gagnÃ© la partie.`);
-    setGameStatus(`Battle Royale terminÃ©. Vainqueur : ${winner}`);
+    alert(`Battle Royale terminé ! ${winner} a gagné la partie.`);
+    setGameStatus(`Battle Royale terminé. Vainqueur : ${winner}`);
   } else {
-    alert("Battle Royale terminÃ© !");
-    setGameStatus("Battle Royale terminÃ©.");
+    alert("Battle Royale terminé !");
+    setGameStatus("Battle Royale terminé.");
   }
 });
 
 socket.on("battlePlayerEliminated", ({ eliminatedPseudo }) => {
   if (eliminatedPseudo) {
-    alert(`${eliminatedPseudo} est Ã©liminÃ© du Battle Royale.`);
-    setGameStatus(`${eliminatedPseudo} est Ã©liminÃ© du Battle Royale.`);
+    alert(`${eliminatedPseudo} est éliminé du Battle Royale.`);
+    setGameStatus(`${eliminatedPseudo} est éliminé du Battle Royale.`);
   } else {
-    alert("Un joueur est Ã©liminÃ© du Battle Royale.");
-    setGameStatus("Un joueur est Ã©liminÃ© du Battle Royale.");
+    alert("Un joueur est éliminé du Battle Royale.");
+    setGameStatus("Un joueur est éliminé du Battle Royale.");
   }
 });
 
@@ -1412,14 +1412,14 @@ socket.on("errorMessage", ({ msg }) => {
 
 socket.on("gameEnded", ({ winner }) => {
   if (winner) {
-    setGameStatus(`Partie terminÃ©e. Vainqueur : ${winner}`);
+    setGameStatus(`Partie terminée. Vainqueur : ${winner}`);
   } else {
-    setGameStatus("Partie terminÃ©e.");
+    setGameStatus("Partie terminée.");
   }
 });
 
 socket.on("connect", () => {
-  console.log("ConnectÃ© au serveur avec playerId:", playerId);
+  console.log("Connecté au serveur avec playerId:", playerId);
   socket.emit("reconnectWithId", { playerId });
   try {
     const lastRoomCode = localStorage.getItem("lastRoomCode");
@@ -1437,7 +1437,7 @@ socket.on("connect", () => {
 });
 
 socket.on("disconnect", () => {
-  console.log("DÃ©connectÃ© du serveur.");
+  console.log("Déconnecté du serveur.");
 });
 
 updateSortControlsUI();
@@ -1448,7 +1448,7 @@ updateSortControlsUI();
 
 const style = document.createElement("style");
 style.textContent = `
-/* Conteneur de la popup : plus de plein Ã©cran */
+/* Conteneur de la popup : plus de plein écran */
 #colorChoicePopup {
   position: fixed;
   left: 50%;
@@ -1457,7 +1457,7 @@ style.textContent = `
   z-index: 9999;
 }
 
-/* BoÃ®te blanche avec les 4 couleurs */
+/* Boîte blanche avec les 4 couleurs */
 .color-choice-box {
   background: rgba(255,255,255,0.97);
   padding: 24px 32px;
@@ -1498,7 +1498,7 @@ style.textContent = `
   color: #d50000;
 }
 
-/* Noir pour trÃ¨fle / pique */
+/* Noir pour trèfle / pique */
 .color-btn[data-color="trefle"],
 .color-btn[data-color="pique"] {
   color: #000000;
@@ -1589,4 +1589,8 @@ sortStyle.textContent = `
 }
 `;
 document.head.appendChild(sortStyle);
+
+
+
+
 
