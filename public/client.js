@@ -17,19 +17,51 @@ const PIOCHE_IMAGE = "cartes/dos.png";
 //           SONS CARTES
 // ===============================
 
-// Préférence simple (pour plus tard, si on ajoute un bouton mute)
+// PrÃ©fÃ©rence simple (pour plus tard, si on ajoute un bouton mute)
 let soundEnabled = true;
 let audioUnlocked = false;
 
-// Fichiers sons (présents dans public/sons/)
+// Fichiers sons (prÃ©sents dans public/sons/)
 const sndPlay = new Audio("sons/card-play.mp3");
 const sndDraw = new Audio("sons/card-draw.mp3");
+
+// Sons spÃ©ciaux pour le Roi de cÅ“ur
+const roiCoeurSoundFiles = [
+  "sons/roi-coeur-1.mp3",
+  "sons/roi-coeur-2.mp3",
+  "sons/roi-coeur-3.mp3",
+];
+
+const roiCoeurAudios = roiCoeurSoundFiles.map((src) => new Audio(src));
+
+function playRoiCoeurSound(index) {
+  if (!soundEnabled) return;
+  if (!roiCoeurAudios.length) return;
+
+  let i;
+  if (typeof index === "number" && roiCoeurAudios.length > 0) {
+    // normalise lâ€™index envoyÃ© par le serveur
+    i =
+      ((index % roiCoeurAudios.length) + roiCoeurAudios.length) %
+      roiCoeurAudios.length;
+  } else {
+    i = Math.floor(Math.random() * roiCoeurAudios.length);
+  }
+
+  const audio = roiCoeurAudios[i];
+  try {
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  } catch (e) {}
+}
 
 function unlockAudio() {
   if (audioUnlocked) return;
   audioUnlocked = true;
 
-  [sndPlay, sndDraw].forEach((a) => {
+  const allAudios = [sndPlay, sndDraw, ...roiCoeurAudios];
+
+  allAudios.forEach((a) => {
     try {
       a.muted = true;
       const p = a.play();
@@ -154,7 +186,7 @@ function getCardImage(card) {
 
 function cardToText(card) {
   if (!card) return "";
-  const suitSymbols = { coeur: "♥", carreau: "♦", trefle: "♣", pique: "♠" };
+  const suitSymbols = { coeur: "â™¥", carreau: "â™¦", trefle: "â™£", pique: "â™ " };
   return `${card.rank}${suitSymbols[card.suit] || "?"}`;
 }
 
@@ -257,7 +289,7 @@ let currentMode = null;
 let sortMode = false;
 let sortSelectedIndex = null;
 let lastAttackPlusDisplayed = 0;
-// État pour synchroniser sons + animations à partir de gameState
+// Ã‰tat pour synchroniser sons + animations Ã  partir de gameState
 let lastDiscardCardKey = null;
 let lastDrawPileCountValue = null;
 let lastPlayersSnapshot = null;
@@ -319,7 +351,7 @@ function setGameStatus(msg) {
 }
 
 /* ===========================================================
-    LOBBY — CREATION / JOIN
+    LOBBY â€” CREATION / JOIN
 =========================================================== */
 
 function createRoom() {
@@ -346,9 +378,9 @@ function createRoom() {
     } catch (e) {}
     isHost = true;
 
-    roomInfoDiv.textContent = "Salle : " + room + " (tu es l'hôte)";
+    roomInfoDiv.textContent = "Salle : " + room + " (tu es l'hÃ´te)";
     startBtn.style.display = "inline-block";
-    setStatus("Salle créée. En attente d'autres joueurs...");
+    setStatus("Salle crÃ©Ã©e. En attente d'autres joueurs...");
   });
 }
 
@@ -389,12 +421,12 @@ socket.on("updatePlayers", (playerList) => {
   playersDiv.innerHTML = playerList
     .map((p) => {
       const pseudo = p.pseudo || "?";
-      const status = p.isConnected ? "" : " (déconnecté)";
+      const status = p.isConnected ? "" : " (dÃ©connectÃ©)";
       const count =
         typeof p.cardCount === "number"
           ? ` - ${p.cardCount} carte${p.cardCount > 1 ? "s" : ""}`
           : "";
-      return `• ${pseudo}${status}${count}`;
+      return `â€¢ ${pseudo}${status}${count}`;
     })
     .join("<br>");
 });
@@ -424,7 +456,7 @@ socket.on("gameStarted", ({ room }) => {
   gameAreaDiv.style.display = "block";
   if (quitBtn) quitBtn.style.display = "block";
   gameRoomName.textContent = "Salle : " + room;
-  setGameStatus("La partie a démarré.");
+  setGameStatus("La partie a dÃ©marrÃ©.");
 });
 
 /* ===========================================================
@@ -452,7 +484,7 @@ function renderGamePlayers() {
 
     let label = p.pseudo;
     if (p.pseudo === myPseudo) label += " (toi)";
-    if (!p.isConnected) label += " (déconnecté)";
+    if (!p.isConnected) label += " (dÃ©connectÃ©)";
     nameDiv.textContent = `${label} - ${p.cardCount} carte(s)`;
     headerDiv.appendChild(nameDiv);
 
@@ -511,7 +543,7 @@ function renderChillScores(players, mode) {
     .map((p) => {
       const pseudo = p.pseudo || "?";
       const score = typeof p.score === "number" && p.score > 0 ? p.score : 0;
-      return `${pseudo} ${"★".repeat(score)}`;
+      return `${pseudo} ${"â˜…".repeat(score)}`;
     })
     .join("<br>");
 }
@@ -740,16 +772,16 @@ function renderBoard() {
     img.alt = cardToText(discardTop);
     defausseCardDiv.appendChild(img);
 
-    // Texte simplifi� : uniquement le nombre de cartes
+    // Texte simplifiï¿½ : uniquement le nombre de cartes
     defausseInfoDiv.textContent = `${discardCount} carte(s)`;
   } else {
     defausseCardDiv.innerHTML =
       '<span style="opacity:0.8;">Aucune carte</span>';
-    // Coh�rent avec la pioche : 0 carte(s)
+    // Cohï¿½rent avec la pioche : 0 carte(s)
     defausseInfoDiv.textContent = "0 carte(s)";
   }
 
-  // BANNIÈRE TOUR
+  // BANNIÃˆRE TOUR
   let pseudoTour = "?";
   if (currentPlayersPub && currentPlayersPub[currentTurnIdx]) {
     pseudoTour = currentPlayersPub[currentTurnIdx].pseudo;
@@ -766,7 +798,7 @@ function renderBoard() {
       `C'est le tour de <span>${pseudoTour}</span>`;
   }
 
-  // Ancienne banni�re couleur d�sormais vide : la couleur est affich�e sous le tour
+  // Ancienne banniï¿½re couleur dï¿½sormais vide : la couleur est affichï¿½e sous le tour
   if (currentColorBannerDiv) {
     currentColorBannerDiv.textContent = "";
   }
@@ -839,7 +871,7 @@ function quitCurrentGame() {
   }
 
   const sure = confirm(
-    "⚠️ Voulez-vous vraiment quitter la partie ?\nCette action est irréversible."
+    "âš ï¸ Voulez-vous vraiment quitter la partie ?\nCette action est irrÃ©versible."
   );
   if (!sure) {
     return;
@@ -854,8 +886,8 @@ function quitCurrentGame() {
 
   resetToLobby(
     wasHost
-      ? "Tu as quitté la partie en tant qu'hôte. La salle est fermée."
-      : "Tu as quitté la partie en cours. Tu restes dans le lobby."
+      ? "Tu as quittÃ© la partie en tant qu'hÃ´te. La salle est fermÃ©e."
+      : "Tu as quittÃ© la partie en cours. Tu restes dans le lobby."
   );
 }
 
@@ -895,7 +927,7 @@ function showEffect(message, imageUrl = null) {
   // affiche
   effectZone.classList.add("visible");
 
-  // disparaît après 2s
+  // disparaÃ®t aprÃ¨s 2s
   setTimeout(() => {
     effectZone.classList.remove("visible");
   }, 2000);
@@ -916,10 +948,10 @@ function askColorChoice(cardId) {
   popup.innerHTML = `
     <div class="color-choice-box">
       <h3>Choisis une couleur :</h3>
-      <button class="color-btn" data-color="coeur">♥</button>
-      <button class="color-btn" data-color="carreau">♦</button>
-      <button class="color-btn" data-color="trefle">♣</button>
-      <button class="color-btn" data-color="pique">♠</button>
+      <button class="color-btn" data-color="coeur">â™¥</button>
+      <button class="color-btn" data-color="carreau">â™¦</button>
+      <button class="color-btn" data-color="trefle">â™£</button>
+      <button class="color-btn" data-color="pique">â™ </button>
     </div>
   `;
 
@@ -1135,14 +1167,25 @@ socket.on("handUpdate", ({ hand }) => {
 
 socket.on(
   "effectEvent",
-  ({ type, message, targetPlayerId, sourcePlayerId }) => {
+  ({ type, message, targetPlayerId, sourcePlayerId, soundIndex }) => {
     console.log(
       "effectEvent reçu :",
       type,
       message,
       targetPlayerId,
-      sourcePlayerId
+      sourcePlayerId,
+      soundIndex
     );
+
+    // Cas spécifique Roi de cœur : son spécial + effet visuel
+    if (type === "roiCoeur") {
+      playRoiCoeurSound(soundIndex);
+
+      setTimeout(() => {
+        if (message) showEffect(message);
+      }, 50);
+      return;
+    }
 
     if (type === "skipSeven") {
       setTimeout(() => {
@@ -1247,11 +1290,11 @@ socket.on("cartePhaseStart", ({ targetIndex, targetPseudo }) => {
 
   if (targetPseudo) {
     setGameStatus(
-      `${targetPseudo} est à 1 carte ! Il doit appuyer sur "Carte". Les adversaires pourront appuyer sur "Contre carte" dans 1 seconde.`
+      `${targetPseudo} est Ã  1 carte ! Il doit appuyer sur "Carte". Les adversaires pourront appuyer sur "Contre carte" dans 1 seconde.`
     );
   } else {
     setGameStatus(
-      `Un joueur est à 1 carte ! Il doit appuyer sur "Carte". Les adversaires pourront appuyer sur "Contre carte" dans 1 seconde.`
+      `Un joueur est Ã  1 carte ! Il doit appuyer sur "Carte". Les adversaires pourront appuyer sur "Contre carte" dans 1 seconde.`
     );
   }
 
@@ -1278,21 +1321,21 @@ socket.on("cartePhaseEnd", () => {
 });
 
 socket.on("roomClosed", ({ reason }) => {
-  let msg = "La salle a été fermée.";
+  let msg = "La salle a Ã©tÃ© fermÃ©e.";
   if (reason === "host_quit") {
-    msg = "L'hôte a quitté la partie. La salle a été fermée.";
+    msg = "L'hÃ´te a quittÃ© la partie. La salle a Ã©tÃ© fermÃ©e.";
   }
   resetToLobby(msg);
 });
 
 socket.on("playerQuitGameInfo", ({ pseudo }) => {
   if (pseudo) {
-    setGameStatus(`${pseudo} a quitté la partie en cours.`);
+    setGameStatus(`${pseudo} a quittÃ© la partie en cours.`);
   }
 });
 
 socket.on("kickedFromGame", ({ room, reason }) => {
-  resetToLobby("Tu as été expulsé de la partie par l'hôte.");
+  resetToLobby("Tu as Ã©tÃ© expulsÃ© de la partie par l'hÃ´te.");
 });
 
 socket.on("newRound", ({ round, total, mode, players }) => {
@@ -1311,7 +1354,7 @@ socket.on("newRound", ({ round, total, mode, players }) => {
 });
 
 socket.on("chillGameOver", ({ scores, winnerId, winnerPseudo }) => {
-  // Déterminer le pseudo du gagnant
+  // DÃ©terminer le pseudo du gagnant
   let gagnant = winnerPseudo || null;
 
   if (!gagnant && winnerId && Array.isArray(currentPlayersPub)) {
@@ -1328,7 +1371,7 @@ socket.on("chillGameOver", ({ scores, winnerId, winnerPseudo }) => {
   // Message identique pour tout le monde
   alert(`${gagnant} remporte la victoire !`);
 
-  // On met quand même à jour l'affichage des scores finaux
+  // On met quand mÃªme Ã  jour l'affichage des scores finaux
   const finalPlayers = Object.entries(scores || {}).map(([id, score]) => {
     const pp = currentPlayersPub.find((p) => p.playerId === id);
     return {
@@ -1341,21 +1384,21 @@ socket.on("chillGameOver", ({ scores, winnerId, winnerPseudo }) => {
 
 socket.on("battleGameOver", ({ winner }) => {
   if (winner) {
-    alert(`Battle Royale terminé ! ${winner} a gagné la partie.`);
-    setGameStatus(`Battle Royale terminé. Vainqueur : ${winner}`);
+    alert(`Battle Royale terminÃ© ! ${winner} a gagnÃ© la partie.`);
+    setGameStatus(`Battle Royale terminÃ©. Vainqueur : ${winner}`);
   } else {
-    alert("Battle Royale terminé !");
-    setGameStatus("Battle Royale terminé.");
+    alert("Battle Royale terminÃ© !");
+    setGameStatus("Battle Royale terminÃ©.");
   }
 });
 
 socket.on("battlePlayerEliminated", ({ eliminatedPseudo }) => {
   if (eliminatedPseudo) {
-    alert(`${eliminatedPseudo} est éliminé du Battle Royale.`);
-    setGameStatus(`${eliminatedPseudo} est éliminé du Battle Royale.`);
+    alert(`${eliminatedPseudo} est Ã©liminÃ© du Battle Royale.`);
+    setGameStatus(`${eliminatedPseudo} est Ã©liminÃ© du Battle Royale.`);
   } else {
-    alert("Un joueur est éliminé du Battle Royale.");
-    setGameStatus("Un joueur est éliminé du Battle Royale.");
+    alert("Un joueur est Ã©liminÃ© du Battle Royale.");
+    setGameStatus("Un joueur est Ã©liminÃ© du Battle Royale.");
   }
 });
 
@@ -1369,14 +1412,14 @@ socket.on("errorMessage", ({ msg }) => {
 
 socket.on("gameEnded", ({ winner }) => {
   if (winner) {
-    setGameStatus(`Partie terminée. Vainqueur : ${winner}`);
+    setGameStatus(`Partie terminÃ©e. Vainqueur : ${winner}`);
   } else {
-    setGameStatus("Partie terminée.");
+    setGameStatus("Partie terminÃ©e.");
   }
 });
 
 socket.on("connect", () => {
-  console.log("Connecté au serveur avec playerId:", playerId);
+  console.log("ConnectÃ© au serveur avec playerId:", playerId);
   socket.emit("reconnectWithId", { playerId });
   try {
     const lastRoomCode = localStorage.getItem("lastRoomCode");
@@ -1394,7 +1437,7 @@ socket.on("connect", () => {
 });
 
 socket.on("disconnect", () => {
-  console.log("Déconnecté du serveur.");
+  console.log("DÃ©connectÃ© du serveur.");
 });
 
 updateSortControlsUI();
@@ -1405,7 +1448,7 @@ updateSortControlsUI();
 
 const style = document.createElement("style");
 style.textContent = `
-/* Conteneur de la popup : plus de plein écran */
+/* Conteneur de la popup : plus de plein Ã©cran */
 #colorChoicePopup {
   position: fixed;
   left: 50%;
@@ -1414,7 +1457,7 @@ style.textContent = `
   z-index: 9999;
 }
 
-/* Boîte blanche avec les 4 couleurs */
+/* BoÃ®te blanche avec les 4 couleurs */
 .color-choice-box {
   background: rgba(255,255,255,0.97);
   padding: 24px 32px;
@@ -1455,7 +1498,7 @@ style.textContent = `
   color: #d50000;
 }
 
-/* Noir pour trèfle / pique */
+/* Noir pour trÃ¨fle / pique */
 .color-btn[data-color="trefle"],
 .color-btn[data-color="pique"] {
   color: #000000;
@@ -1546,3 +1589,4 @@ sortStyle.textContent = `
 }
 `;
 document.head.appendChild(sortStyle);
+
