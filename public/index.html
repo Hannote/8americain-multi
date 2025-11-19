@@ -723,6 +723,75 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
   }
 }
 
+/* ========================= */
+/*   LOBBY RESPONSIVE MOBILE */
+/* ========================= */
+
+@media (max-width: 900px) {
+  /* On arrête de centrer verticalement sur mobile */
+  body {
+    align-items: flex-start;
+    padding-top: 16px;
+  }
+
+  .overlay-lobby {
+    padding: 24px 16px;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 8px;
+    font-size: 18px;
+    border-radius: 0; /* plein écran sur mobile */
+  }
+
+  h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+
+  p, h3 {
+    font-size: 16px;
+  }
+
+  /* Inputs / boutons / select en pleine largeur mais raisonnables */
+  #lobby input,
+  #lobby button,
+  #modeSelect,
+  #chillRounds {
+    width: 100%;
+    max-width: 360px;
+    box-sizing: border-box;
+    font-size: 18px;
+    padding: 12px 14px;
+    margin: 8px auto;
+    display: block;
+  }
+
+  #modeOptions {
+    font-size: 16px;
+    margin-top: 16px;
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .overlay-lobby {
+    max-width: 100%;
+    padding: 20px 12px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  #lobby input,
+  #lobby button,
+  #modeSelect,
+  #chillRounds {
+    font-size: 16px;
+    padding: 10px 12px;
+  }
+}
+
 #defausseCard img {
     width: 100% !important;
     height: 100% !important;
