@@ -882,7 +882,7 @@ socket.on("gameState", (data) => {
       drawBtn.style.background = "linear-gradient(135deg, #b71c1c, #d32f2f)";
       drawBtn.disabled = false;
     } else {
-      drawBtn.textContent = "Piocher (passer son tour)";
+      drawBtn.textContent = "Piocher";
       drawBtn.style.background = "";
       drawBtn.disabled = cartePhaseActive;
     }
