@@ -526,27 +526,54 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 }
 
 @media (max-width: 600px) {
-
+    /* Cartes un peu plus petites sur mobile */
     :root {
-        --card-width: 120px;
-        --card-height: 180px;
+        --card-width: 90px;
+        --card-height: 135px;
         --opponent-card-width: 50px;
         --opponent-card-height: 75px;
     }
 
+    /* Board plus compact (pioche / défausse / zone effet) */
     .board {
-        gap: 20px;
+        gap: 16px;
+        margin: 10px 0;
     }
 
     .pile {
         width: calc(var(--card-width) + 20px);
-        height: calc(var(--card-height) + 160px);
+        height: calc(var(--card-height) + 40px);
+        padding: 10px;
     }
 
-    #discarded-card img {
-        width: 120px;      /* taille fixe raisonnable */
-        max-width: 40vw;   /* limite sur mobile */
-        height: auto;
+    /* Bouton Piocher plus compact */
+    #drawButton {
+        font-size: 18px;
+        padding: 10px 20px;
+        margin-top: 8px;
+    }
+
+    /* Titre "Ta main (X cartes)" plus petit et moins haut */
+    #yourHandTitle {
+        font-size: 16px;
+        margin: 10px 0 4px;
+    }
+
+    /* Zone de contrôle de tri un peu serrée */
+    #handControls {
+        margin-bottom: 6px;
+    }
+
+    /* Main du joueur : moins d’espace vertical perdu */
+    #yourHand {
+        margin-top: 8px;
+        gap: 8px;
+        min-height: var(--card-height);
+    }
+
+    .card {
+        width: var(--card-width);
+        height: var(--card-height);
     }
 }
 
@@ -686,3 +713,4 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 
  </body>
  </html>
+
