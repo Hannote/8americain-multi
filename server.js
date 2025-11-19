@@ -1385,20 +1385,24 @@ io.on("connection", (socket) => {
       }
     }
 
-    // Roi de cœur
+    // Roi de cœur : l'adversaire pioche 3 cartes et son tour est sauté
     if (card.rank === "R" && card.suit === "coeur") {
+      // Le joueur courant pose le Roi de cœur
       ps.hand.splice(cardIdx, 1);
       g.discardPile.push(card);
       g.currentColor = card.suit;
 
-      const next = nextPlayerIndex(g);
-      const forcedPlayer = g.playerStates[next];
+      // La victime est le prochain joueur "normal"
+      const victimIndex = nextPlayerIndex(g);
+      const forcedPlayer = g.playerStates[victimIndex];
 
-      for (let i = 0; i < 3; i++) {
-        reshuffleIfNeeded(g);
-        if (g.drawPile.length === 0) break;
-        const drawnCard = g.drawPile.shift();
-        forcedPlayer.hand.push(drawnCard);
+      if (forcedPlayer) {
+        for (let i = 0; i < 3; i++) {
+          reshuffleIfNeeded(g);
+          if (g.drawPile.length === 0) break;
+          const drawnCard = g.drawPile.shift();
+          forcedPlayer.hand.push(drawnCard);
+        }
       }
 
       // Choix d'un son aléatoire pour le Roi de cœur, partagé à toute la room
@@ -1417,13 +1421,18 @@ io.on("connection", (socket) => {
         `${ps.pseudo} a joué le Roi de cœur. ${forcedPlayer.pseudo} pioche 3 cartes (in-contrable). Son spécial index=${roiSoundIndex}.`
       );
 
-      g.skipTurns = 1;
+      // On considère que le "curseur" de tour est maintenant sur la victime,
+      // dont le tour va être totalement sauté.
+      g.currentTurnIndex = victimIndex;
+      g.skipTurns = 0;
       g.extraTurnPending = false;
 
+      // Gérer éventuellement la fin de manche / phase "carte" pour le poseur du Roi
       if (checkEndOfTurnAndCartePhase(room, g, ps, playerIndex, previousHandLength)) {
         return;
       }
 
+      // Pas de phase "carte" : on saute immédiatement la victime
       g.currentTurnIndex = nextPlayerIndex(g);
       broadcastGameState(room);
       return;
