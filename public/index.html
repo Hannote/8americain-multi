@@ -469,6 +469,31 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     box-shadow: 0 6px 16px rgba(0,0,0,0.9);
 }
 
+/* =========================
+   COUCHE D'ANIMATION CARTES
+   ========================= */
+
+#cardAnimationLayer {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 99990;
+}
+
+.flying-card {
+  position: absolute;
+  width: 120px;
+  height: 180px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.9);
+  transition: transform 0.35s ease-out, opacity 0.35s ease-out;
+  pointer-events: none;
+}
+
 /* ========================= */
 /*        MOBILE             */
 /* ========================= */
@@ -828,6 +853,8 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
         <div id="gameStatus"></div>
     </div>
 </div>
+
+<div id="cardAnimationLayer"></div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="client.js?v=2"></script>
