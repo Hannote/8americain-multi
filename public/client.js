@@ -1099,24 +1099,6 @@ socket.on("gameState", (data) => {
     }
   }
 
-  const isEightOnTop = discardTopCard && discardTopCard.rank === "8";
-  const colorChangedOnEight =
-    gameStateInitialized &&
-    isEightOnTop &&
-    imposedColorBefore &&
-    imposedColorNow &&
-    imposedColorBefore !== imposedColorNow;
-
-  const newEightPlayed =
-    gameStateInitialized && playedCard && isEightOnTop;
-
-  if (newEightPlayed || colorChangedOnEight) {
-    const suitForFlash = imposedColorNow;
-    if (suitForFlash) {
-      showColorFlash(suitForFlash);
-    }
-  }
-
   lastDiscardCardKey = newDiscardKey;
   lastDrawPileCountValue = newDrawCount;
   lastPlayersSnapshot = newPlayers.map((p) => ({
@@ -1201,6 +1183,22 @@ socket.on("gameState", (data) => {
 
       const imgSrc = getCardImage(discardTopCard);
       animateCardMove(fromEl || toEl, toEl, imgSrc);
+
+      // Déclenchement correct de l'animation du 8 uniquement
+      // lorsque la couleur imposée change APRÈS la sélection de couleur.
+      // Pas quand la carte 8 vient d'être posée.
+      const isEightOnTop = discardTopCard && discardTopCard.rank === "8";
+
+      const eightColorJustChosen =
+        gameStateInitialized &&
+        isEightOnTop &&
+        imposedColorBefore &&
+        imposedColorNow &&
+        imposedColorBefore !== imposedColorNow;
+
+      if (eightColorJustChosen) {
+        showColorFlash(imposedColorNow);
+      }
     }
 
     if (drewCard && drawPlayerIndex != null) {
@@ -1222,7 +1220,7 @@ socket.on("gameState", (data) => {
     }
   }
 
-  lastImposedColor = imposedColorNow || null;
+  lastImposedColor = imposedColorNow;
 
   if (!gameStateInitialized) {
     gameStateInitialized = true;
@@ -1680,10 +1678,10 @@ colorFlashStyle.textContent = `
 }
 
 .color-flash-symbol {
-  font-size: clamp(80px, 22vw, 220px);
+  font-size: clamp(250px, 65vw, 650px); /* 3× plus grand */
   font-weight: bold;
-  text-shadow: 0 0 20px rgba(0,0,0,0.85);
-  animation: colorFlashScaleFade 1.5s ease-out forwards;
+  text-shadow: 0 0 35px rgba(0,0,0,0.85);
+  animation: colorFlashScaleFade 3s ease-out forwards; /* animation 2× plus longue */
 }
 
 /* Couleurs des symboles */
@@ -1698,9 +1696,9 @@ colorFlashStyle.textContent = `
 }
 
 @keyframes colorFlashScaleFade {
-  0%   { transform: scale(0.8); opacity: 0; }
-  15%  { transform: scale(1.0); opacity: 1; }
-  100% { transform: scale(1.1); opacity: 0; }
+  0%   { transform: scale(0.7); opacity: 0; }
+  20%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1.35); opacity: 0; }
 }
 `;
 document.head.appendChild(colorFlashStyle);
