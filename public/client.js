@@ -66,6 +66,16 @@ const huitContreSoundFiles = [
 
 const huitContreAudios = huitContreSoundFiles.map((src) => new Audio(src));
 
+// Sons spéciaux pour chaque As joué
+const asSoundFiles = [
+  "sons/as-1.mp3",
+  "sons/as-2.mp3",
+  "sons/as-3.mp3",
+  "sons/as-4.mp3",
+];
+
+const asAudios = asSoundFiles.map((src) => new Audio(src));
+
 function playRoiCoeurSound(index) {
   if (!soundEnabled) return;
   if (!roiCoeurAudios.length) return;
@@ -81,6 +91,25 @@ function playRoiCoeurSound(index) {
   }
 
   const audio = roiCoeurAudios[i];
+  try {
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  } catch (e) {}
+}
+
+function playAsSound(index) {
+  if (!soundEnabled) return;
+  if (!asAudios.length) return;
+
+  let i;
+  if (typeof index === "number" && asAudios.length > 0) {
+    i =
+      ((index % asAudios.length) + asAudios.length) % asAudios.length;
+  } else {
+    i = Math.floor(Math.random() * asAudios.length);
+  }
+
+  const audio = asAudios[i];
   try {
     audio.currentTime = 0;
     audio.play().catch(() => {});
@@ -116,6 +145,7 @@ function unlockAudio() {
     sndDraw,
     ...roiCoeurAudios,
     ...huitContreAudios,
+    ...asAudios,
   ];
 
   allAudios.forEach((a) => {
@@ -1320,6 +1350,12 @@ socket.on(
         if (message) showEffect(message);
       }, 50);
       return;
+    }
+
+    if (type === "attaqueAs") {
+      // Son spécial pour n'importe quel As joué
+      playAsSound(soundIndex);
+      // pas de return : tout le monde voit le message d'attaque
     }
 
   if (type === "huitChoixCouleur") {
