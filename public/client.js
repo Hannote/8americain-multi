@@ -1022,7 +1022,7 @@ function showEffect(message, imageUrl = null) {
   // disparaît après 2s
   setTimeout(() => {
     effectZone.classList.remove("visible");
-  }, 3000);
+  }, 1500);
 }
 
 /* ===========================================================
@@ -1331,12 +1331,15 @@ socket.on(
       soundIndex
     );
 
-    // Cas spécifique Roi de cœur : son spécial + effet visuel
+    // Cas spécifique Roi de cœur : son spécial + effet visuel + GIF
     if (type === "roiCoeur") {
       playRoiCoeurSound(soundIndex);
 
       setTimeout(() => {
-        if (message) showEffect(message);
+        if (message) {
+          // On passe le GIF en deuxième argument : il sera affiché derrière le texte
+          showEffect(message, "gif.gif");
+        }
       }, 50);
       return;
     }
@@ -1708,31 +1711,39 @@ const effectStyle = document.createElement("style");
 effectStyle.textContent = `
 #effectZone {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
-  pointer-events: none;
+  z-index: 9999;
 }
 
 #effectZone.visible {
   opacity: 1;
-  pointer-events: none;
 }
 
 .effectMessage {
+  position: relative;
+  z-index: 2;
   font-size: 32px;
   font-weight: bold;
-  color: yellow;
-  margin-bottom: 12px;
-  text-shadow: 0 0 10px black;
+  text-align: center;
+  padding: 16px 24px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 16px;
+  color: #fff;
 }
 
 .effectImage {
-  width: 150px;
-  height: 110px;
-  object-fit: contain;
+  position: absolute;
+  max-width: 60vw;
+  max-height: 60vh;
+  z-index: 1;
+  opacity: 0.9;
+  pointer-events: none;
 }
 
 .lockedCard {
