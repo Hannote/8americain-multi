@@ -941,6 +941,45 @@ function showEffect(message, imageUrl = null) {
 }
 
 /* ===========================================================
+   ANIMATION VISUELLE QUAND UN 8 CHOISIT UNE COULEUR
+   =========================================================== */
+
+function showColorFlash(color) {
+  const symbols = {
+    coeur: "♥",
+    carreau: "♦",
+    trefle: "♣",
+    pique: "♠",
+  };
+
+  const symbol = symbols[color] || "?";
+
+  // Conteneur plein écran
+  const overlay = document.createElement("div");
+  overlay.className = "color-flash-overlay";
+
+  // Symbole au centre
+  const inner = document.createElement("div");
+  inner.className = `color-flash-symbol color-${color}`;
+  inner.textContent = symbol;
+  overlay.appendChild(inner);
+
+  document.body.appendChild(overlay);
+
+  // Force le reflow pour bien lancer la transition
+  void overlay.offsetWidth;
+  overlay.classList.add("visible");
+
+  // Animation courte (1,5 s) puis suppression
+  setTimeout(() => {
+    overlay.classList.remove("visible");
+    setTimeout(() => {
+      overlay.remove();
+    }, 300);
+  }, 1500);
+}
+
+/* ===========================================================
       LOGIQUE CLIENT POUR CHOIX DE COULEUR (8)
 =========================================================== */
 
@@ -1139,6 +1178,14 @@ socket.on("gameState", (data) => {
 
       const imgSrc = getCardImage(discardTopCard);
       animateCardMove(fromEl || toEl, toEl, imgSrc);
+
+      // Animation spéciale pour le 8 qui choisit une couleur
+      if (discardTopCard.rank === "8") {
+        const suitForFlash = col || discardTopCard.suit || null;
+        if (suitForFlash) {
+          showColorFlash(suitForFlash);
+        }
+      }
     }
 
     if (drewCard && drawPlayerIndex != null) {
@@ -1596,3 +1643,47 @@ sortStyle.textContent = `
 }
 `;
 document.head.appendChild(sortStyle);
+
+const colorFlashStyle = document.createElement("style");
+colorFlashStyle.textContent = `
+.color-flash-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+  z-index: 99998;
+}
+
+.color-flash-overlay.visible {
+  opacity: 1;
+}
+
+.color-flash-symbol {
+  font-size: clamp(80px, 22vw, 220px);
+  font-weight: bold;
+  text-shadow: 0 0 20px rgba(0,0,0,0.85);
+  animation: colorFlashScaleFade 1.5s ease-out forwards;
+}
+
+/* Couleurs des symboles */
+.color-flash-symbol.color-coeur,
+.color-flash-symbol.color-carreau {
+  color: #ff5252; /* rouge vif */
+}
+
+.color-flash-symbol.color-trefle,
+.color-flash-symbol.color-pique {
+  color: #4caf50; /* vert vif qui contraste bien */
+}
+
+@keyframes colorFlashScaleFade {
+  0%   { transform: scale(0.8); opacity: 0; }
+  15%  { transform: scale(1.0); opacity: 1; }
+  100% { transform: scale(1.1); opacity: 0; }
+}
+`;
+document.head.appendChild(colorFlashStyle);
