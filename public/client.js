@@ -57,6 +57,15 @@ const roiCoeurSoundFiles = [
 
 const roiCoeurAudios = roiCoeurSoundFiles.map((src) => new Audio(src));
 
+// Sons spéciaux pour le 8 qui contre une chaîne d'As
+const huitContreSoundFiles = [
+  "sons/8-contre-1.mp3",
+  "sons/8-contre-2.mp3",
+  "sons/8-contre-3.mp3",
+];
+
+const huitContreAudios = huitContreSoundFiles.map((src) => new Audio(src));
+
 function playRoiCoeurSound(index) {
   if (!soundEnabled) return;
   if (!roiCoeurAudios.length) return;
@@ -78,13 +87,39 @@ function playRoiCoeurSound(index) {
   } catch (e) {}
 }
 
+function playHuitContreSound(index) {
+  if (!soundEnabled) return;
+  if (!huitContreAudios.length) return;
+
+  let i;
+  if (typeof index === "number" && huitContreAudios.length > 0) {
+    i =
+      ((index % huitContreAudios.length) + huitContreAudios.length) %
+      huitContreAudios.length;
+  } else {
+    i = Math.floor(Math.random() * huitContreAudios.length);
+  }
+
+  const audio = huitContreAudios[i];
+  try {
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  } catch (e) {}
+}
+
 function unlockAudio() {
   if (audioUnlocked) return;
   audioUnlocked = true;
 
-  const allAudios = [sndPlay, sndDraw, ...roiCoeurAudios];
+  const allAudios = [
+    sndPlay,
+    sndDraw,
+    ...roiCoeurAudios,
+    ...huitContreAudios,
+  ];
 
   allAudios.forEach((a) => {
+    if (!a) return;
     try {
       a.muted = true;
       const p = a.play();
@@ -1287,21 +1322,23 @@ socket.on(
       return;
     }
 
-    if (type === "huitChoixCouleur") {
-      if (sourcePlayerId && sourcePlayerId === playerId) {
-        return;
-      }
-      setTimeout(() => {
-        if (message) showEffect(message);
-      }, 50);
+  if (type === "huitChoixCouleur") {
+    if (sourcePlayerId && sourcePlayerId === playerId) {
       return;
     }
+    setTimeout(() => {
+      if (message) showEffect(message);
+    }, 50);
+    return;
+  }
 
-    if (type === "contreHuit") {
-      if (sourcePlayerId && sourcePlayerId === playerId) {
-        return;
-      }
+  if (type === "contreHuit") {
+    playHuitContreSound(soundIndex);
+
+    if (sourcePlayerId && sourcePlayerId === playerId) {
+      return;
     }
+  }
 
     setTimeout(() => {
       if (message) showEffect(message);
