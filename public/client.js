@@ -1668,9 +1668,12 @@ colorFlashStyle.textContent = `
   align-items: center;
   justify-content: center;
   pointer-events: none;
+
+  z-index: 200000;        /* suffisamment haut pour mobile */
   opacity: 0;
-  transition: opacity 0.2s ease-out;
-  z-index: 99998;
+  transition: opacity 0.25s ease-out;
+  backdrop-filter: none;  /* empêche les conflits Safari */
+  transform: translateZ(0); /* force la couche supérieure */
 }
 
 .color-flash-overlay.visible {
@@ -1678,10 +1681,10 @@ colorFlashStyle.textContent = `
 }
 
 .color-flash-symbol {
-  font-size: clamp(250px, 65vw, 650px); /* 3× plus grand */
+  font-size: clamp(320px, 80vw, 800px); /* 3× plus grand */
   font-weight: bold;
   text-shadow: 0 0 35px rgba(0,0,0,0.85);
-  animation: colorFlashScaleFade 3s ease-out forwards; /* animation 2× plus longue */
+  animation: colorFlashScaleFade 4.5s ease-out forwards; /* animation 2× plus longue */
 }
 
 /* Couleurs des symboles */
