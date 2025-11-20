@@ -1710,15 +1710,16 @@ document.head.appendChild(style);
 const effectStyle = document.createElement("style");
 effectStyle.textContent = `
 #effectZone {
-  position: fixed;
-  inset: 0; /* plein écran */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: fixed !important;
+  inset: 0 !important;            /* plein écran */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   opacity: 0;
   transition: opacity 0.3s ease;
-  pointer-events: none;
-  z-index: 99999;
+  pointer-events: none !important;
+  z-index: 99999 !important;
+  margin: 0 !important;
 }
 
 #effectZone.visible {
@@ -1731,7 +1732,7 @@ effectStyle.textContent = `
   font-size: 32px;
   font-weight: bold;
   color: yellow;
-  margin-bottom: 12px;
+  margin: 0 0 12px 0;
   text-shadow: 0 0 10px black;
   padding: 12px 20px;
   border-radius: 12px;
@@ -1739,6 +1740,7 @@ effectStyle.textContent = `
   text-align: center;
 }
 
+/* GIF centré derrière le texte */
 .effectImage {
   position: absolute;
   top: 50%;
