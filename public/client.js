@@ -796,7 +796,7 @@ function renderBoard() {
 
     // Affichage de la cha\u00eene d'as : +2, +4, +6, +8
     if (currentAttackPlus && currentAttackPlus > 0) {
-      bannerHtml += `<div class="attack-chain-line">+${currentAttackPlus}</div>`;
+      bannerHtml += `<div class="attack-chain-line">Attaque en cours : +${currentAttackPlus}</div>`;
     }
 
     currentTurnBannerDiv.innerHTML = bannerHtml;
