@@ -37,6 +37,7 @@ const rooms = {};
 // Nombre de sons disponibles pour le Roi de cœur (côté client: tableau de sons)
 const ROI_COEUR_SOUND_COUNT = 3; // adapte ce nombre si besoin
 const HUIT_CONTRE_SOUND_COUNT = 3; // sons 8-contre-*.mp3
+const AS_SOUND_COUNT = 4; // sons as-*.mp3
 
 // Un joueur (playerId) ne doit jamais être dans plusieurs salles en même temps.
 // Cette fonction le retire de toutes les salles sauf éventuellement une salle à garder.
@@ -1463,11 +1464,17 @@ io.on("connection", (socket) => {
       const threatened = g.playerStates[threatenedIndex];
 
       if (threatened) {
+        let asSoundIndex = 0;
+        if (AS_SOUND_COUNT > 0) {
+          asSoundIndex = Math.floor(Math.random() * AS_SOUND_COUNT);
+        }
+
         io.to(room).emit("effectEvent", {
           type: "attaqueAs",
           sourcePlayerId: ps.playerId,
           targetPlayerId: threatened.playerId,
           message: `${ps.pseudo} envoie un +${g.attackPlus} à ${threatened.pseudo}`,
+          soundIndex: asSoundIndex,
         });
       }
 
@@ -1746,5 +1753,3 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Serveur lancé sur le port ${PORT}`);
 });
-
-
