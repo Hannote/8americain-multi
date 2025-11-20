@@ -1022,7 +1022,7 @@ function showEffect(message, imageUrl = null) {
   // disparaît après 2s
   setTimeout(() => {
     effectZone.classList.remove("visible");
-  }, 1500);
+  }, 3000);
 }
 
 /* ===========================================================
@@ -1711,14 +1711,14 @@ const effectStyle = document.createElement("style");
 effectStyle.textContent = `
 #effectZone {
   position: fixed;
-  inset: 0;
+  inset: 0; /* plein écran */
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
-  z-index: 9999;
+  pointer-events: none;
+  z-index: 99999;
 }
 
 #effectZone.visible {
@@ -1730,19 +1730,24 @@ effectStyle.textContent = `
   z-index: 2;
   font-size: 32px;
   font-weight: bold;
+  color: yellow;
+  margin-bottom: 12px;
+  text-shadow: 0 0 10px black;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.6);
   text-align: center;
-  padding: 16px 24px;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 16px;
-  color: #fff;
 }
 
 .effectImage {
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
   max-width: 60vw;
   max-height: 60vh;
-  z-index: 1;
-  opacity: 0.9;
+  object-fit: contain;
   pointer-events: none;
 }
 
