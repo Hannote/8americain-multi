@@ -223,6 +223,7 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     align-items: center;
     gap: 28px;
     width: 100%;
+    margin-top: 10px;
 }
 
 /* ========================= */
@@ -307,16 +308,17 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 
 /* Nouvelle ligne pour la couleur imposée */
 .current-color-line {
-    margin-top: 4px;
+    margin-top: 6px;
+    margin-bottom: 6px;   /* ajout pour espacer de l'attaque en cours */
     font-size: 0.75em;
     color: #ffa726;
 }
 
-/* Ligne qui affiche la chaǸne d'as (+2, +4, +6, +8) */
+/* Texte de la chaîne d'as (+2, +4, +6, +8) */
 .attack-chain-line {
-    margin-top: 2px;
-    font-size: 0.5em;      /* plus petit que "Couleur imposǸe" */
-    color: #4caf50;        /* vert bien lisible sur fond sombre */
+    margin-top: 8px;          /* plus d'espace au-dessus */
+    font-size: 0.75em;        /* texte 1.5x plus grand que 0.5em */
+    color: #4caf50;           /* vert contrasté */
     text-shadow: 0 0 6px rgba(0,0,0,0.8);
 }
 
@@ -521,6 +523,7 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 
   #tableWrapper {
     gap: 8px;
+    margin-top: 5px;
   }
 
   .board {
