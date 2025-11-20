@@ -25,6 +25,29 @@ let audioUnlocked = false;
 const sndPlay = new Audio("sons/card-play.mp3");
 const sndDraw = new Audio("sons/card-draw.mp3");
 
+// ===============================
+//        SONS DES COULEURS (8)
+// ===============================
+
+const colorSounds = {
+  coeur: new Audio("sons/coeur.mp3"),
+  carreau: new Audio("sons/carreau.mp3"),
+  trefle: new Audio("sons/trefle.mp3"),
+  pique: new Audio("sons/pique.mp3")
+};
+
+function playColorSound(color) {
+  if (!soundEnabled) return;
+
+  const snd = colorSounds[color];
+  if (!snd) return;
+
+  try {
+    snd.currentTime = 0;
+    snd.play().catch(() => {});
+  } catch (e) {}
+}
+
 // Sons spéciaux pour le Roi de cœur
 const roiCoeurSoundFiles = [
   "sons/roi-coeur-1.mp3",
@@ -1170,6 +1193,7 @@ socket.on("gameState", (data) => {
 
   if (eightColorJustChosen) {
     showColorFlash(imposedColorNow);
+    playColorSound(imposedColorNow);  // joue le son correspondant
   }
 
   if (gameStateInitialized) {
