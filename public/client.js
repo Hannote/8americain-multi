@@ -1004,7 +1004,7 @@ function showColorFlash(color) {
 }
 
 // ===========================================================
-//      ANIMATION EXPLOSION ROI DE COEUR (VISIBLE ALL DEVICES)
+//     ANIMATION ROI DE COEUR : ECLAIRS + FLASH SUR DEFAUSSE
 // ===========================================================
 
 function showHeartKingExplosion(targetEl) {
@@ -1015,35 +1015,35 @@ function showHeartKingExplosion(targetEl) {
   const centerY = rect.top + rect.height / 2;
 
   const container = document.createElement("div");
-  container.className = "rk-explosion-container";
+  container.className = "rk-lightning-container";
   container.style.left = centerX + "px";
   container.style.top = centerY + "px";
 
-  // Couche 1 – flash central blanc / jaune très lumineux
-  const flash = document.createElement("div");
-  flash.className = "rk-flash";
+  // Flash circulaire autour de la défausse
+  const glow = document.createElement("div");
+  glow.className = "rk-lightning-glow";
 
-  // Couche 2 – boule de feu rouge / orange
-  const fireball = document.createElement("div");
-  fireball.className = "rk-fireball";
+  // Eclair principal
+  const mainBolt = document.createElement("div");
+  mainBolt.className = "rk-lightning-main";
 
-  // Couche 3 – étincelles / éclats
-  for (let i = 0; i < 10; i++) {
-    const spark = document.createElement("div");
-    spark.className = "rk-spark";
-    spark.style.setProperty("--angle", 36 * i + "deg");
-    container.appendChild(spark);
-  }
+  // 2 éclairs secondaires pour donner du volume
+  const sideBoltLeft = document.createElement("div");
+  sideBoltLeft.className = "rk-lightning-side rk-lightning-left";
 
-  container.appendChild(flash);
-  container.appendChild(fireball);
+  const sideBoltRight = document.createElement("div");
+  sideBoltRight.className = "rk-lightning-side rk-lightning-right";
+
+  container.appendChild(glow);
+  container.appendChild(mainBolt);
+  container.appendChild(sideBoltLeft);
+  container.appendChild(sideBoltRight);
 
   document.body.appendChild(container);
 
-  // Nettoyage après l’animation
   setTimeout(() => {
     container.remove();
-  }, 1200);
+  }, 900); // durée totale de l'effet
 }
 
 /* ===========================================================
@@ -1791,11 +1791,11 @@ document.head.appendChild(colorFlashStyle);
 const rkStyle = document.createElement("style");
 rkStyle.textContent = `
 
-/* ===============================
-   Explosion Roi de Coeur réaliste
-   =============================== */
+/* ================================
+   ROI DE COEUR : ECLAIRS + FLASH
+   ================================ */
 
-.rk-explosion-container {
+.rk-lightning-container {
   position: fixed !important;
   width: 0;
   height: 0;
@@ -1804,77 +1804,117 @@ rkStyle.textContent = `
   pointer-events: none;
 }
 
-/* Flash central très lumineux (blanc / jaune) */
-.rk-flash {
+/* Halo lumineux autour de la défausse */
+.rk-lightning-glow {
   position: absolute;
-  width: 40vw;
-  height: 40vw;
+  width: 42vw;
+  height: 42vw;
   max-width: 260px;
   max-height: 260px;
-  background: radial-gradient(circle,
-    rgba(255,255,255,1) 0%,
-    rgba(255,245,150,0.95) 35%,
-    rgba(255,230,80,0.0) 80%
-  );
   border-radius: 50%;
-  transform: scale(0.1);
-  animation: rkFlashAnim 0.25s ease-out forwards;
-}
-
-/* Boule de feu rouge / orange */
-.rk-fireball {
-  position: absolute;
-  width: 45vw;
-  height: 45vw;
-  max-width: 300px;
-  max-height: 300px;
   background: radial-gradient(circle,
-    rgba(255,140,0,0.95) 0%,
-    rgba(255,70,0,0.85) 40%,
-    rgba(150,0,0,0.0) 90%
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 245, 150, 0.7) 35%,
+    rgba(255, 215, 64, 0.2) 60%,
+    rgba(255, 215, 64, 0.0) 100%
   );
-  border-radius: 50%;
   transform: scale(0.2);
-  opacity: 0.8;
-  animation: rkFireballAnim 0.9s ease-out forwards;
+  opacity: 0;
+  animation: rkGlowFlash 0.45s ease-out forwards;
 }
 
-/* Étincelles / éclats */
-.rk-spark {
+/* Eclair principal (forme zigzag via clip-path) */
+.rk-lightning-main {
   position: absolute;
-  width: 14px;
-  height: 3px;
-  background: rgba(255,220,120,1);
-  border-radius: 2px;
-  transform-origin: center left;
-  transform: rotate(var(--angle)) translateX(0px) scaleX(0.4);
-  box-shadow: 0 0 6px rgba(255,220,120,0.9);
-  opacity: 1;
-  animation: rkSparkAnim 1s ease-out forwards;
+  width: 60px;
+  height: 180px;
+  background: linear-gradient(
+    to bottom,
+    #ffffff 0%,
+    #fff59d 35%,
+    #ffeb3b 60%,
+    #ff9800 100%
+  );
+  clip-path: polygon(
+    45% 0%,
+    60% 18%,
+    42% 18%,
+    68% 55%,
+    48% 55%,
+    76% 100%,
+    30% 100%,
+    50% 60%,
+    30% 60%,
+    50% 20%,
+    32% 20%
+  );
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9));
+  transform-origin: 50% 0%;
+  transform: translate(-50%, -5%) scale(0.6);
+  opacity: 0;
+  animation: rkMainBolt 0.6s ease-out forwards;
 }
 
-/* Animations keyframes */
-@keyframes rkFlashAnim {
-  0% { transform: scale(0.1); opacity: 1; }
+/* Eclairs secondaires à gauche/droite */
+.rk-lightning-side {
+  position: absolute;
+  width: 40px;
+  height: 120px;
+  background: linear-gradient(
+    to bottom,
+    #ffffff 0%,
+    #fff9c4 40%,
+    #ffe082 100%
+  );
+  clip-path: polygon(
+    45% 0%,
+    60% 22%,
+    42% 22%,
+    68% 60%,
+    48% 60%,
+    72% 100%,
+    30% 100%,
+    50% 65%,
+    30% 65%,
+    50% 25%,
+    32% 25%
+  );
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+  transform-origin: 50% 0%;
+  opacity: 0;
+  animation: rkSideBolt 0.7s ease-out forwards;
+}
+
+.rk-lightning-left {
+  transform: translate(-70%, 0%) rotate(-18deg) scale(0.55);
+}
+
+.rk-lightning-right {
+  transform: translate(-30%, 0%) rotate(16deg) scale(0.55);
+}
+
+/* Animations */
+@keyframes rkGlowFlash {
+  0%   { transform: scale(0.2); opacity: 0; }
+  20%  { transform: scale(1.0); opacity: 1; }
   100% { transform: scale(1.4); opacity: 0; }
 }
 
-@keyframes rkFireballAnim {
-  0% { transform: scale(0.2); opacity: 0.8; }
-  60% { transform: scale(1.4); opacity: 0.5; }
-  100% { transform: scale(1.9); opacity: 0; }
+@keyframes rkMainBolt {
+  0%   { opacity: 0; transform: translate(-50%, -5%) scale(0.4); }
+  10%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -5%) scale(1.05); }
 }
 
-@keyframes rkSparkAnim {
-  0%   { opacity: 1; transform: rotate(var(--angle)) translateX(0px) scaleX(0.4); }
-  70%  { opacity: 1; }
-  100% { opacity: 0; transform: rotate(var(--angle)) translateX(120px) scaleX(1); }
+@keyframes rkSideBolt {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  100% { opacity: 0; }
 }
 
-/* Mobile : explosion plus large */
+/* Mobile : halo et éclairs un peu plus grands */
 @media (max-width: 700px) {
-  .rk-flash,
-  .rk-fireball {
+  .rk-lightning-glow {
     width: 70vw;
     height: 70vw;
     max-width: none;
