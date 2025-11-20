@@ -1709,23 +1709,24 @@ document.head.appendChild(style);
 
 const effectStyle = document.createElement("style");
 effectStyle.textContent = `
+/* Conteneur des messages d'event */
 #effectZone {
-  position: fixed !important;
-  inset: 0 !important;            /* plein écran */
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   opacity: 0;
   transition: opacity 0.3s ease;
-  pointer-events: none !important;
-  z-index: 99999 !important;
-  margin: 0 !important;
+  pointer-events: none;
+  z-index: 99999;
 }
 
+/* Quand un message est visible */
 #effectZone.visible {
   opacity: 1;
 }
 
+/* Texte du message d'event, centré */
 .effectMessage {
   position: relative;
   z-index: 2;
@@ -1740,7 +1741,7 @@ effectStyle.textContent = `
   text-align: center;
 }
 
-/* GIF centré derrière le texte */
+/* GIF pour le Roi de Coeur : derrière le texte, centré comme lui */
 .effectImage {
   position: absolute;
   top: 50%;
@@ -1753,6 +1754,7 @@ effectStyle.textContent = `
   pointer-events: none;
 }
 
+/* (inchangé) */
 .lockedCard {
   opacity: 0.3;
   pointer-events: none;
