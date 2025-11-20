@@ -1003,6 +1003,30 @@ function showColorFlash(color) {
   }, 1500);
 }
 
+// ===========================================================
+//      ANIMATION EXPLOSION ROI DE COEUR (VISIBLE ALL DEVICES)
+// ===========================================================
+
+function showHeartKingExplosion(targetEl) {
+  if (!targetEl) return;
+
+  // conteneur overlay
+  const explosion = document.createElement("div");
+  explosion.className = "rk-explosion";
+
+  // positionner au centre de la défausse
+  const rect = targetEl.getBoundingClientRect();
+  explosion.style.left = rect.left + rect.width / 2 + "px";
+  explosion.style.top = rect.top + rect.height / 2 + "px";
+
+  document.body.appendChild(explosion);
+
+  // retirer après animation
+  setTimeout(() => {
+    explosion.remove();
+  }, 1200); // durée totale animation
+}
+
 /* ===========================================================
       LOGIQUE CLIENT POUR CHOIX DE COULEUR (8)
 =========================================================== */
@@ -1221,6 +1245,16 @@ socket.on("gameState", (data) => {
 
       const imgSrc = getCardImage(discardTopCard);
       animateCardMove(fromEl || toEl, toEl, imgSrc);
+
+      // Explosion ROI DE COEUR — seulement quand il est réellement posé
+      if (
+        playedCard &&
+        discardTopCard &&
+        discardTopCard.rank === "R" &&
+        discardTopCard.suit === "coeur"
+      ) {
+        showHeartKingExplosion(defausseCardDiv);
+      }
 
     }
 
@@ -1734,3 +1768,42 @@ html, body {
 }
 `;
 document.head.appendChild(colorFlashStyle);
+
+const rkStyle = document.createElement("style");
+rkStyle.textContent = `
+/* Explosion Roi de Coeur */
+.rk-explosion {
+  position: fixed!important;
+  width: 20vw;
+  height: 20vw;
+  max-width: 180px;
+  max-height: 180px;
+  background: radial-gradient(circle,
+       rgba(255, 0, 0, 0.9) 0%,
+       rgba(255, 120, 120, 0.7) 40%,
+       rgba(255, 200, 200, 0.3) 70%,
+       rgba(255, 255, 255, 0) 100%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.1);
+  animation: rkExplode 1.2s ease-out forwards;
+  z-index: 999999; /* visible partout mobile + desktop */
+  pointer-events: none;
+}
+
+@keyframes rkExplode {
+  0%   { transform: translate(-50%, -50%) scale(0.1); opacity: 0.9; }
+  40%  { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.7); opacity: 0; }
+}
+
+/* Forcer bonne apparence mobile */
+@media (max-width: 700px) {
+  .rk-explosion {
+    width: 45vw;
+    height: 45vw;
+    max-width: none;
+    max-height: none;
+  }
+}
+`;
+document.head.appendChild(rkStyle);
