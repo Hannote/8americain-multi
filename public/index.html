@@ -507,18 +507,25 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
   }
 
   #tableWrapper {
-    gap: 12px;
+    gap: 8px;
   }
 
   .board {
-    margin-top: 6px;
-    gap: 12px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    gap: 8px;
   }
 
   #currentTurnBanner {
-    font-size: 30px;
-    margin-top: 4px;
+    font-size: 26px;
+    margin-top: 2px;
     margin-bottom: 0;
+  }
+
+  #currentColorBanner {
+    font-size: 18px;
+    margin-top: 2px;
+    margin-bottom: 2px;
   }
 
   /* Couleur imposée un peu plus petite que "C'est le tour de X" */
@@ -546,7 +553,7 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
   /* Bouton Piocher : plus compact sur mobile */
   #drawButton {
     display: block;
-    margin: 6px auto 2px auto;
+    margin: 4px auto 2px auto;
     padding: 8px 18px;
     font-size: 18px;
     width: auto;
@@ -556,13 +563,11 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 
   /* "Ta main (X cartes)" + bouton Mode tri : beaucoup plus serrés */
   #yourHandTitle {
-    font-size: 18px;
-    margin-top: 4px;
-    margin-bottom: 2px;
+    display: none;
   }
 
   #handControls {
-    margin-top: 0;
+    margin-top: 2px;
     margin-bottom: 4px;
   }
 
@@ -613,7 +618,7 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     justify-content: center;
     align-items: flex-start;
     flex-wrap: nowrap;
-    gap: 12px;
+    gap: 8px;
   }
 
   /* Chaque pile s’adapte au contenu, plus de hauteur fixe */
@@ -652,7 +657,7 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 
   #drawButton {
     display: block;
-    margin: 6px auto 2px auto;
+    margin: 4px auto 2px auto;
     padding: 8px 18px;
     font-size: 18px;
     width: auto;
@@ -668,7 +673,7 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
   }
 
   #handControls {
-    margin-top: 0;
+    margin-top: 2px;
     margin-bottom: 4px;
   }
 
@@ -902,16 +907,18 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
         </div>
 
         <!-- Bouton Piocher sous la table -->
-        <button id="drawButton" onclick="drawCard()">
-            Piocher
-        </button>
         <div id="carteZone">
             <button id="btnCarte" class="carte-btn carte-btn-principal">Carte</button>
             <button id="btnContre" class="carte-btn carte-btn-contre">Contre carte</button>
         </div>
 
-        <!-- Titre avec compteur de cartes -->
-        <h3 id="yourHandTitle">Ta main :</h3>
+        <!-- Titre (conservé pour le JS, mais vide) -->
+        <h3 id="yourHandTitle"></h3>
+
+        <!-- Bouton Piocher + Mode tri regroupés -->
+        <button id="drawButton" onclick="drawCard()">
+            Piocher
+        </button>
         <div id="handControls" class="hand-controls">
             <button id="toggleSortMode">Mode tri : OFF</button>
             <button id="autoSortColor" style="display:none;">Trier par couleur</button>
