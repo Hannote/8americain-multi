@@ -295,6 +295,7 @@ let lastDrawPileCountValue = null;
 let lastPlayersSnapshot = null;
 let lastTurnIndex = null;
 let gameStateInitialized = false;
+let lastImposedColor = null;
 
 function getHandOrderKey() {
   const room = currentRoom || window.roomCode || "";
@@ -1041,6 +1042,10 @@ socket.on("gameState", (data) => {
     mode,
   } = data;
 
+  const imposedColorNow =
+    col || (discardTopCard ? discardTopCard.suit : null);
+  const imposedColorBefore = lastImposedColor;
+
   const prevPlayers = Array.isArray(lastPlayersSnapshot)
     ? lastPlayersSnapshot
     : null;
@@ -1091,6 +1096,24 @@ socket.on("gameState", (data) => {
           }
         }
       }
+    }
+  }
+
+  const isEightOnTop = discardTopCard && discardTopCard.rank === "8";
+  const colorChangedOnEight =
+    gameStateInitialized &&
+    isEightOnTop &&
+    imposedColorBefore &&
+    imposedColorNow &&
+    imposedColorBefore !== imposedColorNow;
+
+  const newEightPlayed =
+    gameStateInitialized && playedCard && isEightOnTop;
+
+  if (newEightPlayed || colorChangedOnEight) {
+    const suitForFlash = imposedColorNow;
+    if (suitForFlash) {
+      showColorFlash(suitForFlash);
     }
   }
 
@@ -1178,14 +1201,6 @@ socket.on("gameState", (data) => {
 
       const imgSrc = getCardImage(discardTopCard);
       animateCardMove(fromEl || toEl, toEl, imgSrc);
-
-      // Animation spéciale pour le 8 qui choisit une couleur
-      if (discardTopCard.rank === "8") {
-        const suitForFlash = col || discardTopCard.suit || null;
-        if (suitForFlash) {
-          showColorFlash(suitForFlash);
-        }
-      }
     }
 
     if (drewCard && drawPlayerIndex != null) {
@@ -1206,6 +1221,8 @@ socket.on("gameState", (data) => {
       animateCardMove(fromEl, toEl, PIOCHE_IMAGE);
     }
   }
+
+  lastImposedColor = imposedColorNow || null;
 
   if (!gameStateInitialized) {
     gameStateInitialized = true;
