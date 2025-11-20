@@ -790,9 +790,16 @@ function renderBoard() {
   const imposedColor = currentColor || (discardTop ? discardTop.suit : null);
 
   if (imposedColor) {
-    currentTurnBannerDiv.innerHTML =
+    let bannerHtml =
       `C'est le tour de <span>${pseudoTour}</span>` +
       `<div class="current-color-line">Couleur impos\u00e9e : ${imposedColor}</div>`;
+
+    // Affichage de la cha\u00eene d'as : +2, +4, +6, +8
+    if (currentAttackPlus && currentAttackPlus > 0) {
+      bannerHtml += `<div class="attack-chain-line">+${currentAttackPlus}</div>`;
+    }
+
+    currentTurnBannerDiv.innerHTML = bannerHtml;
   } else {
     currentTurnBannerDiv.innerHTML =
       `C'est le tour de <span>${pseudoTour}</span>`;
@@ -930,7 +937,7 @@ function showEffect(message, imageUrl = null) {
   // disparaît après 2s
   setTimeout(() => {
     effectZone.classList.remove("visible");
-  }, 2000);
+  }, 3000);
 }
 
 /* ===========================================================
