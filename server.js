@@ -36,8 +36,8 @@ const rooms = {};
 
 // Nombre de sons disponibles pour le Roi de cœur (côté client: tableau de sons)
 const ROI_COEUR_SOUND_COUNT = 3; // adapte ce nombre si besoin
-const HUIT_CONTRE_SOUND_COUNT = 3; // sons 8-contre-*.mp3
-const AS_SOUND_COUNT = 4; // sons as-*.mp3
+const HUIT_CONTRE_SOUND_COUNT = 2; // sons 8-contre-1.mp3 et 8-contre-2.mp3
+const AS_SOUND_COUNT = 1; // seulement as-1.mp3
 
 // Un joueur (playerId) ne doit jamais être dans plusieurs salles en même temps.
 // Cette fonction le retire de toutes les salles sauf éventuellement une salle à garder.
