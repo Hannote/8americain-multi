@@ -312,6 +312,14 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     color: #ffa726;
 }
 
+/* Ligne qui affiche la chaǸne d'as (+2, +4, +6, +8) */
+.attack-chain-line {
+    margin-top: 2px;
+    font-size: 0.5em;      /* plus petit que "Couleur imposǸe" */
+    color: #4caf50;        /* vert bien lisible sur fond sombre */
+    text-shadow: 0 0 6px rgba(0,0,0,0.8);
+}
+
 @keyframes glowPulse {
     0%   { transform: scale(1); }
     50%  { transform: scale(1.06); }
@@ -417,6 +425,11 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+}
+
+/* Hide the game status text while keeping JS logic intact */
+#gameStatus {
+    display: none;
 }
 
 /* ========================= */
