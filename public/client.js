@@ -61,7 +61,6 @@ const roiCoeurAudios = roiCoeurSoundFiles.map((src) => new Audio(src));
 const huitContreSoundFiles = [
   "sons/8-contre-1.mp3",
   "sons/8-contre-2.mp3",
-  "sons/8-contre-3.mp3",
 ];
 
 const huitContreAudios = huitContreSoundFiles.map((src) => new Audio(src));
@@ -69,9 +68,6 @@ const huitContreAudios = huitContreSoundFiles.map((src) => new Audio(src));
 // Sons spéciaux pour chaque As joué
 const asSoundFiles = [
   "sons/as-1.mp3",
-  "sons/as-2.mp3",
-  "sons/as-3.mp3",
-  "sons/as-4.mp3",
 ];
 
 const asAudios = asSoundFiles.map((src) => new Audio(src));
