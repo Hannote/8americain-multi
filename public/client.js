@@ -1010,21 +1010,40 @@ function showColorFlash(color) {
 function showHeartKingExplosion(targetEl) {
   if (!targetEl) return;
 
-  // conteneur overlay
-  const explosion = document.createElement("div");
-  explosion.className = "rk-explosion";
-
-  // positionner au centre de la défausse
   const rect = targetEl.getBoundingClientRect();
-  explosion.style.left = rect.left + rect.width / 2 + "px";
-  explosion.style.top = rect.top + rect.height / 2 + "px";
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
 
-  document.body.appendChild(explosion);
+  const container = document.createElement("div");
+  container.className = "rk-explosion-container";
+  container.style.left = centerX + "px";
+  container.style.top = centerY + "px";
 
-  // retirer après animation
+  // Couche 1 – flash central blanc / jaune très lumineux
+  const flash = document.createElement("div");
+  flash.className = "rk-flash";
+
+  // Couche 2 – boule de feu rouge / orange
+  const fireball = document.createElement("div");
+  fireball.className = "rk-fireball";
+
+  // Couche 3 – étincelles / éclats
+  for (let i = 0; i < 10; i++) {
+    const spark = document.createElement("div");
+    spark.className = "rk-spark";
+    spark.style.setProperty("--angle", 36 * i + "deg");
+    container.appendChild(spark);
+  }
+
+  container.appendChild(flash);
+  container.appendChild(fireball);
+
+  document.body.appendChild(container);
+
+  // Nettoyage après l’animation
   setTimeout(() => {
-    explosion.remove();
-  }, 1200); // durée totale animation
+    container.remove();
+  }, 1200);
 }
 
 /* ===========================================================
@@ -1771,36 +1790,93 @@ document.head.appendChild(colorFlashStyle);
 
 const rkStyle = document.createElement("style");
 rkStyle.textContent = `
-/* Explosion Roi de Coeur */
-.rk-explosion {
-  position: fixed!important;
-  width: 20vw;
-  height: 20vw;
-  max-width: 180px;
-  max-height: 180px;
-  background: radial-gradient(circle,
-       rgba(255, 0, 0, 0.9) 0%,
-       rgba(255, 120, 120, 0.7) 40%,
-       rgba(255, 200, 200, 0.3) 70%,
-       rgba(255, 255, 255, 0) 100%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%) scale(0.1);
-  animation: rkExplode 1.2s ease-out forwards;
-  z-index: 999999; /* visible partout mobile + desktop */
+
+/* ===============================
+   Explosion Roi de Coeur réaliste
+   =============================== */
+
+.rk-explosion-container {
+  position: fixed !important;
+  width: 0;
+  height: 0;
+  transform: translate(-50%, -50%);
+  z-index: 999999 !important;
   pointer-events: none;
 }
 
-@keyframes rkExplode {
-  0%   { transform: translate(-50%, -50%) scale(0.1); opacity: 0.9; }
-  40%  { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(1.7); opacity: 0; }
+/* Flash central très lumineux (blanc / jaune) */
+.rk-flash {
+  position: absolute;
+  width: 40vw;
+  height: 40vw;
+  max-width: 260px;
+  max-height: 260px;
+  background: radial-gradient(circle,
+    rgba(255,255,255,1) 0%,
+    rgba(255,245,150,0.95) 35%,
+    rgba(255,230,80,0.0) 80%
+  );
+  border-radius: 50%;
+  transform: scale(0.1);
+  animation: rkFlashAnim 0.25s ease-out forwards;
 }
 
-/* Forcer bonne apparence mobile */
+/* Boule de feu rouge / orange */
+.rk-fireball {
+  position: absolute;
+  width: 45vw;
+  height: 45vw;
+  max-width: 300px;
+  max-height: 300px;
+  background: radial-gradient(circle,
+    rgba(255,140,0,0.95) 0%,
+    rgba(255,70,0,0.85) 40%,
+    rgba(150,0,0,0.0) 90%
+  );
+  border-radius: 50%;
+  transform: scale(0.2);
+  opacity: 0.8;
+  animation: rkFireballAnim 0.9s ease-out forwards;
+}
+
+/* Étincelles / éclats */
+.rk-spark {
+  position: absolute;
+  width: 14px;
+  height: 3px;
+  background: rgba(255,220,120,1);
+  border-radius: 2px;
+  transform-origin: center left;
+  transform: rotate(var(--angle)) translateX(0px) scaleX(0.4);
+  box-shadow: 0 0 6px rgba(255,220,120,0.9);
+  opacity: 1;
+  animation: rkSparkAnim 1s ease-out forwards;
+}
+
+/* Animations keyframes */
+@keyframes rkFlashAnim {
+  0% { transform: scale(0.1); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+@keyframes rkFireballAnim {
+  0% { transform: scale(0.2); opacity: 0.8; }
+  60% { transform: scale(1.4); opacity: 0.5; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+@keyframes rkSparkAnim {
+  0%   { opacity: 1; transform: rotate(var(--angle)) translateX(0px) scaleX(0.4); }
+  70%  { opacity: 1; }
+  100% { opacity: 0; transform: rotate(var(--angle)) translateX(120px) scaleX(1); }
+}
+
+/* Mobile : explosion plus large */
 @media (max-width: 700px) {
-  .rk-explosion {
-    width: 45vw;
-    height: 45vw;
+  .rk-flash,
+  .rk-fireball {
+    width: 70vw;
+    height: 70vw;
     max-width: none;
     max-height: none;
   }
