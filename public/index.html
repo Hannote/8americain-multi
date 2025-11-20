@@ -221,9 +221,9 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 28px;
+    gap: 16px;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 /* ========================= */
@@ -336,8 +336,8 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    gap: 40px;          /* au lieu de 520px !!! */
-    margin: 20px 0;
+    gap: 24px;          /* au lieu de 520px !!! */
+    margin: 8px 0;
     flex-wrap: wrap;
     width: 100%;
 }
@@ -434,6 +434,10 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
     display: none;
 }
 
+#yourHandTitle {
+    display: none;
+}
+
 /* ========================= */
 /*     MAIN DU JOUEUR        */
 /* ========================= */
@@ -471,7 +475,8 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 
 /* BOUTON PIOCHER PLUS FUN */
 #drawButton {
-    margin-top: 4px;
+    margin-top: 8px;
+    margin-bottom: 4px;
     background: linear-gradient(135deg, #ff9800, #ff5722);
     color: #fff;
     font-weight: bold;
@@ -482,6 +487,11 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
 #drawButton:hover {
     transform: scale(1.05);
     box-shadow: 0 6px 16px rgba(0,0,0,0.9);
+}
+
+#handControls {
+    margin-top: 4px;
+    margin-bottom: 8px;
 }
 
 /* =========================
@@ -522,14 +532,14 @@ h3 { font-size: 26px; margin: 24px 0 10px; }
   }
 
   #tableWrapper {
-    gap: 8px;
-    margin-top: 5px;
+    gap: 8px;          /* réduit mais pas collé */
+    margin-top: 4px;   /* rapproche légèrement la pioche/défausse de la bannière */
   }
 
   .board {
-    margin-top: 4px;
+    gap: 18px;         /* colonnes un peu plus proches */
+    margin-top: 6px;   /* petit espace propre sous la bannière */
     margin-bottom: 4px;
-    gap: 8px;
   }
 
   #currentTurnBanner {
