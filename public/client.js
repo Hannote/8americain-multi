@@ -1748,8 +1748,8 @@ effectStyle.textContent = `
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
-  max-width: 60vw;
-  max-height: 60vh;
+  max-width: 90vw;
+  max-height: 90vh;
   object-fit: contain;
   pointer-events: none;
 }
