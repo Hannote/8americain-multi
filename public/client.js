@@ -1158,6 +1158,20 @@ socket.on("gameState", (data) => {
   renderBoard();
   renderMyHand();
 
+  // Déclenchement correct de l’animation du 8 : uniquement après CHANGEMENT de couleur imposée
+  const isEightOnTop = discardTopCard && discardTopCard.rank === "8";
+
+  const eightColorJustChosen =
+    gameStateInitialized &&
+    isEightOnTop &&
+    imposedColorBefore &&
+    imposedColorNow &&
+    imposedColorBefore !== imposedColorNow;
+
+  if (eightColorJustChosen) {
+    showColorFlash(imposedColorNow);
+  }
+
   if (gameStateInitialized) {
     if (playedCard && discardTopCard) {
       playCardSound();
@@ -1184,21 +1198,6 @@ socket.on("gameState", (data) => {
       const imgSrc = getCardImage(discardTopCard);
       animateCardMove(fromEl || toEl, toEl, imgSrc);
 
-      // Déclenchement correct de l'animation du 8 uniquement
-      // lorsque la couleur imposée change APRÈS la sélection de couleur.
-      // Pas quand la carte 8 vient d'être posée.
-      const isEightOnTop = discardTopCard && discardTopCard.rank === "8";
-
-      const eightColorJustChosen =
-        gameStateInitialized &&
-        isEightOnTop &&
-        imposedColorBefore &&
-        imposedColorNow &&
-        imposedColorBefore !== imposedColorNow;
-
-      if (eightColorJustChosen) {
-        showColorFlash(imposedColorNow);
-      }
     }
 
     if (drewCard && drawPlayerIndex != null) {
@@ -1662,18 +1661,24 @@ document.head.appendChild(sortStyle);
 const colorFlashStyle = document.createElement("style");
 colorFlashStyle.textContent = `
 .color-flash-overlay {
-  position: fixed;
-  inset: 0;
+  position: fixed !important;
+  inset: 0 !important;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
 
-  z-index: 200000;        /* suffisamment haut pour mobile */
+  z-index: 999999 !important;     /* passe au-dessus de tout, même sur mobile */
   opacity: 0;
   transition: opacity 0.25s ease-out;
-  backdrop-filter: none;  /* empêche les conflits Safari */
-  transform: translateZ(0); /* force la couche supérieure */
+
+  transform: none !important;      /* évite les stacking contexts Safari */
+  -webkit-transform: none !important;
+}
+
+html, body {
+  position: relative !important;
+  z-index: 0 !important;
 }
 
 .color-flash-overlay.visible {
@@ -1683,7 +1688,7 @@ colorFlashStyle.textContent = `
 .color-flash-symbol {
   font-size: clamp(320px, 80vw, 800px); /* 3× plus grand */
   font-weight: bold;
-  text-shadow: 0 0 35px rgba(0,0,0,0.85);
+  text-shadow: 0 0 40px rgba(0,0,0,0.85);
   animation: colorFlashScaleFade 4.5s ease-out forwards; /* animation 2× plus longue */
 }
 
@@ -1699,9 +1704,9 @@ colorFlashStyle.textContent = `
 }
 
 @keyframes colorFlashScaleFade {
-  0%   { transform: scale(0.7); opacity: 0; }
-  20%  { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(1.35); opacity: 0; }
+  0%   { transform: scale(0.5); opacity: 0; }
+  25%  { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
 }
 `;
 document.head.appendChild(colorFlashStyle);
