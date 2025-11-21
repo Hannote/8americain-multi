@@ -21,164 +21,144 @@ const PIOCHE_IMAGE = "cartes/dos.png";
 let soundEnabled = true;
 let audioUnlocked = false;
 
-// Fichiers sons (présents dans public/sons/)
-const sndPlay = new Audio("sons/card-play.mp3");
-const sndDraw = new Audio("sons/card-draw.mp3");
-
 // ===============================
-//        SONS DES COULEURS (8)
+//      AUDIO WEB (AudioContext)
 // ===============================
 
-const colorSounds = {
-  coeur: new Audio("sons/coeur.mp3"),
-  carreau: new Audio("sons/carreau.mp3"),
-  trefle: new Audio("sons/trefle.mp3"),
-  pique: new Audio("sons/pique.mp3")
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const audioBuffers = {};
+
+// Map logique -> fichier audio (les chemins restent les mêmes qu'avant)
+const soundFiles = {
+  play: "sons/card-play.mp3",
+  draw: "sons/card-draw.mp3",
+  // Couleurs (8)
+  coeur: "sons/coeur.mp3",
+  carreau: "sons/carreau.mp3",
+  trefle: "sons/trefle.mp3",
+  pique: "sons/pique.mp3",
+  // Roi de coeur
+  roiCoeur0: "sons/roi-coeur-1.mp3",
+  roiCoeur1: "sons/roi-coeur-2.mp3",
+  roiCoeur2: "sons/roi-coeur-3.mp3",
+  // 8 qui contre
+  huitContre0: "sons/8-contre-1.mp3",
+  huitContre1: "sons/8-contre-2.mp3",
+  // As (pour l’instant 1 seul)
+  as0: "sons/as-1.mp3",
 };
 
-function playColorSound(color) {
-  if (!soundEnabled) return;
-
-  const snd = colorSounds[color];
-  if (!snd) return;
-
+// Charge et décode un son
+async function loadSound(key, url) {
   try {
-    snd.currentTime = 0;
-    snd.play().catch(() => {});
-  } catch (e) {}
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    audioBuffers[key] = audioBuffer;
+  } catch (e) {
+    console.warn("Impossible de charger le son :", key, url, e);
+  }
 }
 
-// Sons spéciaux pour le Roi de cœur
-const roiCoeurSoundFiles = [
-  "sons/roi-coeur-1.mp3",
-  "sons/roi-coeur-2.mp3",
-  "sons/roi-coeur-3.mp3",
-];
+// Préchargement de tous les sons au démarrage
+Object.entries(soundFiles).forEach(([key, url]) => {
+  loadSound(key, url);
+});
 
-const roiCoeurAudios = roiCoeurSoundFiles.map((src) => new Audio(src));
+// Fonction générique pour jouer un son à partir de sa clé
+function playSoundByKey(key) {
+  if (!soundEnabled) return;
+  if (!audioUnlocked) return;
 
-// Sons spéciaux pour le 8 qui contre une chaîne d'As
-const huitContreSoundFiles = [
-  "sons/8-contre-1.mp3",
-  "sons/8-contre-2.mp3",
-];
+  const buffer = audioBuffers[key];
+  if (!buffer) return; // pas encore chargé → on ne fait rien
 
-const huitContreAudios = huitContreSoundFiles.map((src) => new Audio(src));
+  // Si le contexte est suspendu (souvent le cas au chargement), on tente de le reprendre
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume().catch(() => { });
+  }
 
-// Sons spéciaux pour chaque As joué
-const asSoundFiles = [
-  "sons/as-1.mp3",
-];
+  const source = audioCtx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(audioCtx.destination);
+  source.start(0);
+}
 
-const asAudios = asSoundFiles.map((src) => new Audio(src));
+// ===============================
+//   FONCTIONS APPELÉES PAR LE JEU
+//   (API identique à avant)
+// ===============================
+
+function playCardSound() {
+  playSoundByKey("play");
+}
+
+function playDrawSound() {
+  playSoundByKey("draw");
+}
+
+function playColorSound(color) {
+  // color = "coeur" | "carreau" | "trefle" | "pique"
+  playSoundByKey(color);
+}
 
 function playRoiCoeurSound(index) {
-  if (!soundEnabled) return;
-  if (!roiCoeurAudios.length) return;
-
+  const maxSounds = 3;
   let i;
-  if (typeof index === "number" && roiCoeurAudios.length > 0) {
-    // normalise l'index envoyé par le serveur
-    i =
-      ((index % roiCoeurAudios.length) + roiCoeurAudios.length) %
-      roiCoeurAudios.length;
+  if (typeof index === "number") {
+    i = ((index % maxSounds) + maxSounds) % maxSounds;
   } else {
-    i = Math.floor(Math.random() * roiCoeurAudios.length);
+    i = Math.floor(Math.random() * maxSounds);
   }
-
-  const audio = roiCoeurAudios[i];
-  try {
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
-  } catch (e) {}
-}
-
-function playAsSound(index) {
-  if (!soundEnabled) return;
-  if (!asAudios.length) return;
-
-  let i;
-  if (typeof index === "number" && asAudios.length > 0) {
-    i =
-      ((index % asAudios.length) + asAudios.length) % asAudios.length;
-  } else {
-    i = Math.floor(Math.random() * asAudios.length);
-  }
-
-  const audio = asAudios[i];
-  try {
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
-  } catch (e) {}
+  playSoundByKey(`roiCoeur${i}`);
 }
 
 function playHuitContreSound(index) {
-  if (!soundEnabled) return;
-  if (!huitContreAudios.length) return;
-
+  const maxSounds = 2;
   let i;
-  if (typeof index === "number" && huitContreAudios.length > 0) {
-    i =
-      ((index % huitContreAudios.length) + huitContreAudios.length) %
-      huitContreAudios.length;
+  if (typeof index === "number") {
+    i = ((index % maxSounds) + maxSounds) % maxSounds;
   } else {
-    i = Math.floor(Math.random() * huitContreAudios.length);
+    i = Math.floor(Math.random() * maxSounds);
   }
-
-  const audio = huitContreAudios[i];
-  try {
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
-  } catch (e) {}
+  playSoundByKey(`huitContre${i}`);
 }
+
+function playAsSound(index) {
+  // on ignore l'index pour l’instant, un seul son
+  playSoundByKey("as0");
+}
+
+// ===============================
+//       DÉBLOCAGE AUDIO MOBILE
+// ===============================
 
 function unlockAudio() {
   if (audioUnlocked) return;
   audioUnlocked = true;
 
-  const allAudios = [
-    sndPlay,
-    sndDraw,
-    ...roiCoeurAudios,
-    ...huitContreAudios,
-    ...asAudios,
-  ];
-
-  allAudios.forEach((a) => {
-    if (!a) return;
-    try {
-      a.muted = true;
-      const p = a.play();
-      if (p && typeof p.then === "function") {
-        p.then(() => {
-          a.pause();
-          a.currentTime = 0;
-          a.muted = false;
-        }).catch(() => {});
-      } else {
-        a.pause();
-        a.currentTime = 0;
-        a.muted = false;
-      }
-    } catch (e) {}
-  });
+  if (audioCtx.state === "suspended") {
+    audioCtx
+      .resume()
+      .then(() => {
+        // petit buffer silencieux pour "réveiller" iOS en douceur
+        try {
+          const buffer = audioCtx.createBuffer(1, 1, 22050);
+          const source = audioCtx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(audioCtx.destination);
+          source.start(0);
+        } catch (e) {
+          // on ignore, ce n'est qu'une optimisation
+        }
+      })
+      .catch(() => { });
+  }
 }
 
-function playCardSound() {
-  if (!soundEnabled) return;
-  try {
-    sndPlay.currentTime = 0;
-    sndPlay.play().catch(() => {});
-  } catch (e) {}
-}
-
-function playDrawSound() {
-  if (!soundEnabled) return;
-  try {
-    sndDraw.currentTime = 0;
-    sndDraw.play().catch(() => {});
-  } catch (e) {}
-}
+// On s'assure de débloquer l'audio dès le premier geste utilisateur
+window.addEventListener("click", unlockAudio, { once: true });
+window.addEventListener("touchstart", unlockAudio, { once: true });
 
 const cardImages = {
   "7_coeur": "cartes/7h.png",
@@ -460,7 +440,7 @@ function createRoom() {
     try {
       localStorage.setItem("lastRoomCode", room);
       localStorage.setItem("lastPseudo", pseudo);
-    } catch (e) {}
+    } catch (e) { }
     isHost = true;
 
     roomInfoDiv.textContent = "Salle : " + room + " (tu es l'hôte)";
@@ -490,7 +470,7 @@ function joinRoom() {
     try {
       localStorage.setItem("lastRoomCode", room);
       localStorage.setItem("lastPseudo", pseudo);
-    } catch (e) {}
+    } catch (e) { }
     isHost = false;
 
     roomInfoDiv.textContent = "Salle : " + room;
@@ -1357,23 +1337,23 @@ socket.on(
       // pas de return : tout le monde voit le message d'attaque
     }
 
-  if (type === "huitChoixCouleur") {
-    if (sourcePlayerId && sourcePlayerId === playerId) {
+    if (type === "huitChoixCouleur") {
+      if (sourcePlayerId && sourcePlayerId === playerId) {
+        return;
+      }
+      setTimeout(() => {
+        if (message) showEffect(message);
+      }, 50);
       return;
     }
-    setTimeout(() => {
-      if (message) showEffect(message);
-    }, 50);
-    return;
-  }
 
-  if (type === "contreHuit") {
-    playHuitContreSound(soundIndex);
+    if (type === "contreHuit") {
+      playHuitContreSound(soundIndex);
 
-    if (sourcePlayerId && sourcePlayerId === playerId) {
-      return;
+      if (sourcePlayerId && sourcePlayerId === playerId) {
+        return;
+      }
     }
-  }
 
     setTimeout(() => {
       if (message) showEffect(message);
